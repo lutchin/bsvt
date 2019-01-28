@@ -22,12 +22,12 @@
             </span>
 		@endif
         @if(!empty($items))
-        @foreach($items as  $cat => $posts) <?dd($posts)?>
+        @foreach($items as  $cat => $posts)
             <div class="row">
                 <p class="title title_cat pdf_box">
                 	<span>{{ $cat }}</span>
                 	<span>
-                		<a target="_blank" href="/{{  $report->types->slug }}/pdf_category/{{ $report->id }}/{{$posts->first()->category_id}}" class="pdf"></a>
+                		<a target="_blank" href="/{{  $report->types->slug }}/pdf_category/{{ $report->id }}/{{ \App\Category::where('title',$cat)->first()->id }}" class="pdf"></a>
                 	</span>
                 </p>
             </div>
@@ -45,7 +45,7 @@
                             		<a target="_blank" href="/weekly/pdf_article/{{ $post->id }}" class="pdf"></a>
                             	</span>
 	                        <?php
-	                        $description = explode(' ', ltrim(html_entity_decode(strip_tags($post->body))));
+	                        $description = explode(' ', ltrim(html_entity_decode(strip_tags($post->description))));
 	                        count($description) <40 ? $count = count($description): $count = 40;
 	                        $descrurtion_short = implode(' ', array_slice($description,0, $count));
 	                        ?>
@@ -53,15 +53,14 @@
 								<span>{{$descrurtion_short}}...</span>
 							</p>
 						 @if( $role != 'user' && $role !='employee' )
-                            	@if($post->published == 0 && $weeklyreport->published!=2)
+                            	@if($post->published == 0 && $report->published!=2)
 										<span class="status st-line st-0">| Не утверждено</span>
-									@elseif($post->published == 1 && $weeklyreport->published!=2)
+									@elseif($post->published == 1 && $report->published!=2)
 										<span class="status st-line st-1">| Ожидает утверждения</span>
-									@elseif($post->published == 2 && $weeklyreport->published!=2)
+									@elseif($post->published == 2 && $report->published!=2)
 										<span class="status st-line st-2">| Утверждено</span>
                             	@endif
 							@endif
-                         </p>
 
                      </div>
                     @endif

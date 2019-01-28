@@ -54,18 +54,18 @@ function getMonthText($m) {
 @section('content')
     <div class="container add_form_step2 posr">
     	
-    	<h3 class="title">{{$reporttitle}} № {{ $monthlyreport->number }} ({{ getMonthText(date('m', $monthlyreport->start_date)) }} {{ date('Y', $monthlyreport->start_date) }})
+    	<h3 class="title">{{$report->types->description}} № {{ $report->number }} ({{ getMonthText(date('m', $report->start_date)) }} {{ date('Y', $report->start_date) }})
     		<span>
-				<a target="_blank" href="/monthly/pdf_item/{{ $monthlyreport->id }}" class="pdf"></a>
+				<a target="_blank" href="/monthly/pdf_item/{{ $report->id }}" class="pdf"></a>
 			</span>
     	</h3>
 		@if( $role != 'user' && $role !='employee' )
-        <span class="pos_tr_article_out status st-{{10 + $monthlyreport->published}}">
-	    	@if($monthlyreport->published == 2)
+        <span class="pos_tr_article_out status st-{{10 + $report->status}}">
+	    	@if($report->status == 2)
 	    		<span class="status st_inherit">Статус:</span> Опубликован
-	    	@elseif($monthlyreport->published == 1)
+	    	@elseif($report->status == 1)
 	    		<span class="status st_inherit">Статус:</span> Все материалы утверждены
-	    	@elseif($monthlyreport->published == 0)
+	    	@elseif($report->status == 0)
 	    		<span class="status st_inherit">Статус:</span> Не опубликован
 	    		
 	    	@endif
@@ -79,7 +79,7 @@ function getMonthText($m) {
                     	<p class="title title_cat">
                         	{{ $n1 }}. {{ $cat }}
                         	<span>
-	                            <a target="_blank" href="/monthly/pdf_category/{{ $monthlyreport->id }}/{{ \App\Category::where('title',$cat)->first()->id }}" class="pdf"></a>
+	                            <a target="_blank" href="/{{ $report->types->slug }}/pdf_category/{{ $report->id }}/{{ \App\Category::where('title',$cat)->first()->id }}" class="pdf"></a>
 	                        </span>
 			            </p>
 			   		</div>
@@ -91,7 +91,7 @@ function getMonthText($m) {
                     				<p class="title padl_sub1 title_sub_cat">
 										{{ $n1 }}.{{ $n2 }}. {{ $key }}
 										<span>
-		                                    <a target="_blank" href="/monthly/pdf_subcategory/{{ $monthlyreport->id }}/{{ \App\Category::where('title',$cat)->first()->id }}/{{ \App\Subcategory::where('title',$key)->first()->id }}" class="pdf"></a>
+		                                    <a target="_blank" href="/{{ $report->types->slug }}/pdf_subcategory/{{ $report->id }}/{{ \App\Category::where('title',$cat)->first()->id }}/{{ \App\Subcategory::where('title',$key)->first()->id }}" class="pdf"></a>
 		                                </span>
 									</p>
 								</div>
@@ -102,7 +102,7 @@ function getMonthText($m) {
                                 <div class="row padl_sub2 out_list_title">
                                     <p class="pdf_box">
                                     	<span>
-	                                        <a href="/monthly/article/{{ $v->id }}">
+	                                        <a href="/{{ $report->types->slug }}/article/{{ $v->id }}">
 	
 	                                            <p>  {{ $n1 }}.{{ $n2 }}.{{ $n3 }}. {{ $v->title }}</p>
 	                                        </a>
@@ -111,7 +111,7 @@ function getMonthText($m) {
 		                            		<a target="_blank" href="/monthly/pdf_article/{{ $v->id }}" class="pdf"></a>
 		                            	</span>
 										<?php
-										$description = explode(' ', ltrim(html_entity_decode(strip_tags($v->body))));
+										$description = explode(' ', ltrim(html_entity_decode(strip_tags($v->description))));
 										count($description) <40 ? $count = count($description): $count = 40;
 										$descrurtion_short = implode(' ', array_slice($description,0, $count));
 										?>
@@ -119,11 +119,11 @@ function getMonthText($m) {
 											<span>{{$descrurtion_short}}...</span>
 										</p>
 									@if( $role != 'user' && $role !='employee' )
-		                            	@if($v->published == 0 && $monthlyreport->published!=2)
+		                            	@if($v->status == 0 && $report->published!=2)
 		                            		<p class="status st-line st-0">| Не утверждено</p>
-		                            	@elseif($v->published == 1 && $monthlyreport->published!=2)
+		                            	@elseif($v->status == 1 && $report->status !=2)
 		                            		<p class="status st-line st-1">| Ожидает утверждения</p>
-		                            	@elseif($v->published == 2 && $monthlyreport->published!=2)
+		                            	@elseif($v->status == 2 && $report->status !=2)
 		                            		<p class="status st-line st-2">| Утверждено</p>
 		                            	@endif
 									@endif
@@ -137,12 +137,12 @@ function getMonthText($m) {
                 <div class="row box_save_article mt30">
 		            
 		           	@if(Request::url() == URL::previous())
-					    <a href="/analyst/monthly/" class="button butt_back">Все отчеты</a>
+					    <a href="/{{ $report->types->slug }}/" class="button butt_back">Все отчеты</a>
 					@else
 						<a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
 					@endif
 						@if( $role != 'user' && $role !='employee' )
-		           	<a class="button butt_def" href="/analyst/monthly/add2/{{ $monthlyreport->id }}">Редактировать</a>
+		           	<a class="button butt_def" href="/{{ $report->types->slug }}/add2/{{ $report->id }}">Редактировать</a>
 						@endif
 		        </div>
 	    
