@@ -46,7 +46,7 @@ class ReportController extends Controller
     }
 
 
-    public function report_show ( $slug = null, Report $report ) {
+    public function report_show ( $slug , Report $report ) {
 
 	    if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 
@@ -69,7 +69,7 @@ class ReportController extends Controller
 		    }
 	    }
 
-	    return view('report.show', compact('report', 'items', 'categories'));
+	    return view('report.'.$slug.'.show', compact('report', 'items', 'categories'));
 
     }
 

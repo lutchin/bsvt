@@ -4,30 +4,30 @@
 @section('content')
     <div class="container add_form_step2 posr">
     	
-            <h3 class="title">{{ $reporttitle }} № {{ $weeklyreport->number }} за период от {{date("d.m.Y",$start_date)}} до {{date("d.m.Y",$end_date)}}
+            <h3 class="title">{{ $report->types->description }} № {{ $report->number }} за период от {{date("d.m.Y",$report->date_start)}} до {{date("d.m.Y",$report->date_end)}}
             	<span>
-            		<a target="_blank" href="/weekly/pdf_item/{{ $weeklyreport->id }}" class="pdf"></a>
+            		<a target="_blank" href="/{{  $report->types->slug }}/pdf_item/{{ $report->id }}" class="pdf"></a>
             	</span>
             </h3>
 		@if( $role != 'user' && $role !='employee' )
-        	<span class="pos_tr_article_out status st-{{10 + $weeklyreport->published}}">
-            	@if($weeklyreport->published == 2)
+        	<span class="pos_tr_article_out status st-{{10 + $report->status}}">
+            	@if($report->status == 2)
             		<span class="status st_inherit">Статус:</span> Опубликован
-            	@elseif($weeklyreport->published == 1)
+            	@elseif($report->status == 1)
             		<span class="status st_inherit">Статус:</span> Все материалы утверждены
-            	@elseif($weeklyreport->published == 0)
+            	@elseif($report->status == 0)
             		<span class="status st_inherit">Статус:</span> Не опубликован
             		
             	@endif
             </span>
 		@endif
         @if(!empty($items))
-        @foreach($items as  $cat => $posts)
+        @foreach($items as  $cat => $posts) <?dd($posts)?>
             <div class="row">
                 <p class="title title_cat pdf_box">
                 	<span>{{ $cat }}</span>
                 	<span>
-                		<a target="_blank" href="/weekly/pdf_category/{{ $weeklyreport->id }}/{{$posts->first()->category_id}}" class="pdf"></a>
+                		<a target="_blank" href="/{{  $report->types->slug }}/pdf_category/{{ $report->id }}/{{$posts->first()->category_id}}" class="pdf"></a>
                 	</span>
                 </p>
             </div>
@@ -76,7 +76,7 @@
 				<a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
 			@endif
 				@if( $role != 'user' && $role !='employee' )
-            <a class="button butt_def" href="/analyst/weekly/add2/{{ $weeklyreport->id }}">Редактировать</a>
+            <a class="button butt_def" href="/analyst/{{  $report->types->slug }}/add2/{{ $report->id }}">Редактировать</a>
 				@endif
         </div>
         
