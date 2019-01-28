@@ -64,12 +64,14 @@ class ReportController extends Controller
 		    foreach ( $articles as $article ) {
 			    if ( $article->category_id == $category->id ) {
 
-				    $items[ $category->title ][] = $article;
+				    $subcategory = $article->subcategory != NULL ? $article->subcategory->title : 'false';
+				    $items[ $category->title ][$subcategory] [] = $article;
 			    }
 		    }
 	    }
 
-	    return view('report.'.$slug.'.show', compact('report', 'items', 'categories'));
+	    //$slug = 'monthly';
+	    return view('report.'.$slug.'.show', compact('report', 'items'));
 
     }
 
