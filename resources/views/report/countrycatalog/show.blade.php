@@ -9,16 +9,16 @@ $y = date("Y");
 @section('content')
     <div class="container add_form_step2 posr">
         <h3 class="title">
-        	Ежегодный справочник "{{ $title }}" за {{date("Y",$countrycatalog->start_date)}} год
-        	<a target="_blank" href="/countrycatalog/pdf_item/{{ $countrycatalog->id }}" class="pdf"></a>
+        	Ежегодный справочник "{{ $report->types->description }}" за {{date("Y",$report->date_start)}} год
+        	<a target="_blank" href="/{{ $report->types->slug }}/pdf_item/{{ $report->id }}" class="pdf"></a>
         </h3>
 		@if( $role != 'user' && $role !='employee' )
-		<span class="pos_tr_article_out status st-{{10 + $countrycatalog->published}}">
-        	@if($countrycatalog->published == 2)
+		<span class="pos_tr_article_out status st-{{ 10 + $report->status }}">
+        	@if($report->status == 2)
         		<span class="status st_inherit">Статус:</span> Опубликован
-        	@elseif($countrycatalog->published == 1)
+        	@elseif($report->status == 1)
         		<span class="status st_inherit">Статус:</span> Все материалы утверждены
-        	@elseif($countrycatalog->published == 0)
+        	@elseif($report->status == 0)
         		<span class="status st_inherit">Статус:</span> Не опубликован
         		
         	@endif
@@ -28,8 +28,8 @@ $y = date("Y");
 			@foreach($items as  $region)
 			<div class="row out_list_title">
 				<p class="title">
-					{{ $region->title }}
-					<a target="_blank" href="/countrycatalog/pdf_category/{{ $region->id }}" class="pdf"></a>
+					{{ $region->title }}<?dd($region)?>
+					<a target="_blank" href="/{{ $report->types->slug }}/pdf_category/{{ $region->id }}" class="pdf"></a>
 				</p>
 			</div>
 				@if(!empty($region->countries))
@@ -38,18 +38,18 @@ $y = date("Y");
 							<div class="vpor_box">
 								<p class="vpor_title">Военно-политическая обстановка в регионе
 									@if( $role != 'user' && $role !='employee' )
-	                            	@if($region->published == 0 && $countrycatalog->published!=2)
+	                            	@if($region->start == 0 && $report->start !=2)
 	                            		<span class="status st-line st-0">| Не утверждено</span>
-	                            	@elseif($region->published == 1 && $countrycatalog->published!=2)
+	                            	@elseif($region->start == 1 && $report->start !=2)
 	                            		<span class="status st-line st-1">| Ожидает утверждения</span>
-	                            	@elseif($region->published == 2 && $countrycatalog->published!=2)
+	                            	@elseif($region->start == 2 && $report->start !=2)
 	                            		<span class="status st-line st-2">| Утверждено</span>
 	                            	@endif
 									@endif
 								</p>
 								
 								<div class="vpor_desc" style="display:none;">
-									{!!$region->overview !!}
+									{!!$region->description !!}
 									
 								</div>
 							</div>
@@ -59,12 +59,12 @@ $y = date("Y");
 
 						<div class="row padl_sub1 out_list_title">
 							<p class="pdf_box">
-                            	<a href="/countrycatalog/article/{{ $country->id }}/{{$countrycatalog->id}}">
+                            	<a href="/countrycatalog/article/{{ $country->id }}/{{$report->id}}">
                               		{{ $country->title }}
                             	</a>
                             	<a target="_blank" href="/countrycatalog/pdf_article/{{ $country->id }}" class="pdf"></a>
 								<?php
-								$description = explode(' ', ltrim(html_entity_decode(strip_tags($country->overview))));
+								$description = explode(' ', ltrim(html_entity_decode(strip_tags($country->description))));
 								count($description) <40 ? $count = count($description): $count = 40;
 								$descrurtion_short = implode(' ', array_slice($description,0, $count));
 								?>
@@ -98,7 +98,7 @@ $y = date("Y");
 			<a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
 		@endif
 			@if( $role != 'user' && $role !='employee' )
-        	<a class="button butt_def" href="/analyst/countrycatalog/add2/{{ $countrycatalog->id }}">Редактировать</a>
+        	<a class="button butt_def" href="/analyst/countrycatalog/add2/{{ $report->id }}">Редактировать</a>
 			@endif
     </div>
 @endsection

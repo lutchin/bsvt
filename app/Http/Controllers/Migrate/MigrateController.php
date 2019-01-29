@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Migrate;
 
 use App\Category;
 use App\Http\Controllers\Controller;
+use App\models\analyst\yearly\Countrycatalog;
+use App\models\analyst\yearly\InfoCountry;
+use App\models\analyst\yearly\Region;
 use Illuminate\Support\Facades\Auth;
 use App\models\analyst\weekly\Weeklyarticle;
 use App\models\analyst\weekly\Weeklyreport;
@@ -260,7 +263,7 @@ class MigrateController extends Controller
 	public function migrate_two () {
 
 
-		$reports = Monthlyreport::all();
+		$reports = Countrycatalog::all();
 
 		$count = 0;
 		foreach ( $reports as $report ) {
@@ -268,7 +271,7 @@ class MigrateController extends Controller
 
 			$report_new = new Report();
 
-			$report_new->type_id = 2;
+			$report_new->type_id = 3;
 			$report_new->date_start = $report->start_date;
 			$report_new->date_end = $report->end_date;
 			$report_new->status = $report->published;
@@ -277,18 +280,33 @@ class MigrateController extends Controller
 			$report_new->updated_at = $report->updated_at;
 			$report_new->save();
 
-			$categories = Category::where('report_type_id', $report_new->type_id )->get();
+			$categories = Region::where('countrycatalog_id', $report->id )->get();
+
 			//$subcategories = Subcategory::where('report_type_id', $report_new->type_id )->get();
 			foreach( $categories as $category ) {
 
-				$subcategories = Subcategory::where( 'category_id', $category->id )->get();
+				$category_new = new Category();
+				$category_new->title = $category->title;
+				$category_new->description = $category->overview;
+				//$category_new->date_start = $category->start_date;
+				//$category_new->date_end = $category->end_date;
+				$category_new->report_id = $report_new->id;
+				$category_new->report_type_id = $report_new->type_id;
+				$category_new->created_at = $category->created_at;
+				$category_new->updated_at = $category->updated_at;
 
-				foreach ( $subcategories as $subcategory ) {
+				$category_new->save();
 
-					$weeklyarticles = Monthlyarticle::where( [
-						'monthlyreport_id' => $report->id,
-						'category_id'     => $category->id,
-						'subcategory_id'  => $subcategory->id
+
+
+				//$subcategories = Subcategory::where( 'category_id', $category->id )->get();
+
+				//foreach ( $subcategories as $subcategory ) {
+
+					$weeklyarticles = InfoCountry::where( [
+						//'monthlyreport_id' => $report->id,
+						'region_id'     => $category->id,
+						//'subcategory_id'  => $subcategory->id
 					] )->get();
 
 					foreach ( $weeklyarticles as $weeklyarticle ) {
@@ -302,12 +320,12 @@ class MigrateController extends Controller
 						$personalities = Personality::find( $weeklyarticle->personality );
 						$images        = ImageArticle::find( $weeklyarticle->weeklyimages );
 
-						$article->category_id = $category->id;
-						$article->subcategory_id = $subcategory->id;
+						$article->category_id = $category_new->id;
+						//$article->subcategory_id = $subcategory->id;
 						$article->title       = $weeklyarticle->title;
-						$article->description = $weeklyarticle->body;
-						$article->date_start  = $weeklyarticle->start_period;
-						$article->date_end    = $weeklyarticle->end_period;
+						$article->description = $weeklyarticle->overview;
+						$article->date_start  = $weeklyarticle->start_date;
+						$article->date_end    = $weeklyarticle->end_date;
 						$article->status      = $weeklyarticle->published;
 						$article->created_at  = $weeklyarticle->created_at;
 						$article->updated_at  = $weeklyarticle->updated_at;
@@ -369,9 +387,9 @@ class MigrateController extends Controller
 				}
 
 			}
-		}
+	//	}
 
-		return redirect()->to('/report/monthly')->with('status', $count. '  Статьи добавлены!');
+		return redirect()->to('/report/countrycatalog')->with('status', $count. '  Статьи добавлены!');
 	}
 
     public function role () {
