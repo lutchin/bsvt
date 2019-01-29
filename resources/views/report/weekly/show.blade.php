@@ -21,6 +21,11 @@
             	@endif
             </span>
 		@endif
+
+
+
+
+
         @if(!empty($items))
         @foreach($items as  $cat => $posts)
             <div class="row">
@@ -31,6 +36,9 @@
                 	</span>
                 </p>
             </div>
+
+
+
 
                 @foreach($posts as  $post)
                     @if(isset($post))
@@ -65,8 +73,19 @@
                      </div>
                     @endif
                 @endforeach
+
+
+
+
+
+
+
             @endforeach
     @endif
+
+
+
+
 
 	    <div class="row box_save_article mt30">
             @if(Request::url() == URL::previous())

@@ -48,6 +48,7 @@ function getMonthText($m) {
 	
 	return $m_name;
 }
+
 ?>
 @extends('layouts.app')
 
@@ -71,6 +72,9 @@ function getMonthText($m) {
 	    	@endif
 	    </span>
 		@endif
+
+
+
                 <?php $n1 = 0; $n2 = 0; $n3 = 0; ?>
                 @foreach($items as  $cat =>$item)
                     @if($cat != 'false')
@@ -83,7 +87,10 @@ function getMonthText($m) {
 	                        </span>
 			            </p>
 			   		</div>
-			   		
+
+
+
+
                         @foreach($item as  $key =>$value)
                             @if($key !== 'false')
                             <?php $n2++; ?>
@@ -131,11 +138,18 @@ function getMonthText($m) {
                                 @endif
                             @endforeach
                         @endforeach
+
+
+
+
                     @endif
                 @endforeach
-                
+
+
+
+
+
                 <div class="row box_save_article mt30">
-		            
 		           	@if(Request::url() == URL::previous())
 					    <a href="/{{ $report->types->slug }}/" class="button butt_back">Все отчеты</a>
 					@else

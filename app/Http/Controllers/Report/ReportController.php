@@ -60,19 +60,25 @@ class ReportController extends Controller
 
 	    $articles    = $report->articles()->where('report_id', $report->id )->get();
 
+        //dump($articles);
+        //dump($categories);
+
 	    foreach ( $categories as $category ) {
 		    foreach ( $articles as $article ) {
 			    if ( $article->category_id == $category->id ) {
 
-				    $subcategory = $article->subcategory != NULL ? $article->subcategory->title : 'false';
-				    $items[ $category->title ][$subcategory] [] = $article;
+				    $subcategory = $article->subcategory != NULL ? $article->subcategory->title : false;
+                   // dump();
+                    if($subcategory) $items[ $category->title ][$subcategory] [] = $article;
+				    else $items[ $category->title ] [] = $article;
 			    }
 		    }
 	    }
 
 	    //$slug = 'monthly';
-	    return view('report.'.$slug.'.show', compact('report', 'items'));
-
+	   // return view('report.'.$slug.'.show', compact('report', 'items'));
+        
+        return view('report.monthly_weekly_show', compact('report', 'items'));
     }
 
 
