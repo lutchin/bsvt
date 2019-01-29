@@ -71,7 +71,7 @@ class ReportController extends Controller
 	    }
 
 	    //$slug = 'monthly';
-	    return view('report.'.$slug.'.show', compact('report', 'items'));
+	    return view('report.'.$slug.'.show', compact('report', 'items', 'categories', 'articles'));
 
     }
 

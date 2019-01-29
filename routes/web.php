@@ -40,6 +40,7 @@ Route::middleware('checkuser')->group(function()
 	Route::post('/simply_search', 'User\HomeController@search');
 	Route::get('/migrate', 'Migrate\MigrateController@migrate');
 	Route::get('/migrate_one', 'Migrate\MigrateController@migrate_one');
+	Route::get('/migrate_two', 'Migrate\MigrateController@migrate_two');
 	Route::get('/delete', 'Migrate\MigrateController@delete');
     /*Bug*/
 	Route::post('/bug', 'User\HomeController@bug')->name('bug');
