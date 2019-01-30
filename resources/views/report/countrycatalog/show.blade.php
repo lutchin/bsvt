@@ -12,6 +12,7 @@ $y = date("Y");
         	Ежегодный справочник "{{ $report->types->description }}" за {{date("Y",$report->date_start)}} год
         	<a target="_blank" href="/{{ $report->types->slug }}/pdf_item/{{ $report->id }}" class="pdf"></a>
         </h3>
+
 		@if( $role != 'user' && $role !='employee' )
 		<span class="pos_tr_article_out status st-{{ 10 + $report->status }}">
         	@if($report->status == 2)
@@ -24,6 +25,8 @@ $y = date("Y");
         	@endif
         </span>
 		@endif
+
+
 		@if(!empty($items))
 			@foreach($items as  $region)
 			<div class="row out_list_title">
@@ -91,6 +94,8 @@ $y = date("Y");
 
     </div>
 
+
+
     <div class="row box_save_article mt30">
         @if(Request::url() == URL::previous())
 		    <a href="/analyst/countrycatalog/" class="button butt_back">Все отчеты</a>
@@ -101,7 +106,15 @@ $y = date("Y");
         	<a class="button butt_def" href="/analyst/countrycatalog/add2/{{ $report->id }}">Редактировать</a>
 			@endif
     </div>
+
+
+
 @endsection
+
+
+
+
+
 
 @section('scripts')
 <script type="text/javascript" charset="utf-8">

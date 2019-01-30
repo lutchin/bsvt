@@ -1,28 +1,26 @@
 @extends('layouts.pdf')
 
 @section('content')
-    <h1 style="text-align: center">Бюллетень военно-политической и военно-технической информации № {{ $report->number }} за период с {{date("d.m.y",$report->start_date)}} по {{date("d.m.y",$report->end_date)}}</h1>
+    <h1 style="text-align: center">Бюллетень военно-политической и военно-технической информации № {{ $report->number }} за период с {{date("d.m.y",$report->date_start)}} по {{date("d.m.y",$report->date_end)}}</h1>
 
-    @if(!empty($article))
-        @foreach($article as  $cat => $posts)
+    @if(!empty($report_array))
 
                 <h3 class="title title_cat" style="text-align: center">
-                    {{ $cat }}
+                    {{ $category }}
                 </h3>
 
-            @foreach($posts as  $post)
+            @foreach($report_array as $post)
                 @if(isset($post))
-
 
                         @if(isset($post->title))
                             <h3 class="title" style="text-align: center">{{ $post->title }}</h3>
                         @endif
 
-                        <p>{!!   $post->body !!}</p>
+                        <p>{!! $post->description !!}</p>
 
                         <p class="pdf_gallery">
-                            @if(isset($post->weeklyimages))
-                                @foreach($post->weeklyimages as $image)
+                            @if(isset($post->images))
+                                @foreach($post->images as $image)
                                     <img style="margin-bottom: 30px; max-height: 940px" src="images/{{$image->image}}">
                                 @endforeach
                             @endif
@@ -32,7 +30,6 @@
                 <div class="more"></div>
             @endforeach
 
-        @endforeach
     @endif
 
 

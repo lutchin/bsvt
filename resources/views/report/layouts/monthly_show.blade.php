@@ -5,7 +5,7 @@
             <p class="title padl_sub1 title_sub_cat">
                 {{ $n1 }}.{{ $n2 }}. {{ $key }}
                 <span>
-                                                <a target="_blank" href="/{{ $report->types->slug }}/pdf_subcategory/{{ $report->id }}/{{ \App\Category::where('title',$cat)->first()->id }}/{{ \App\Subcategory::where('title',$key)->first()->id }}" class="pdf"></a>
+                                                <a target="_blank" href="/pdf_subcategory/{{ $report->id }}/{{ \App\Category::where('title',$cat)->first()->id }}/{{ \App\Subcategory::where('title',$key)->first()->id }}" class="pdf"></a>
                                             </span>
             </p>
         </div>
@@ -16,13 +16,13 @@
             <div class="row padl_sub2 out_list_title">
                 <p class="pdf_box">
                                             <span>
-                                                <a href="/{{ $report->types->slug }}/article/{{ $v->id }}">
+                                                <a href="/report/{{ $report->types->slug }}/article/{{ $v->id }}">
 
                 <p>  {{ $n1 }}.{{ $n2 }}.{{ $n3 }}. {{ $v->title }}</p>
                 </a>
                 </span>
                                             <span>
-                                                <a target="_blank" href="/monthly/pdf_article/{{ $v->id }}" class="pdf"></a>
+                                                <a target="_blank" href="/pdf_article/{{ $v->id }}" class="pdf"></a>
                                             </span>
                 <?php
                 $description = explode(' ', ltrim(html_entity_decode(strip_tags($v->description))));

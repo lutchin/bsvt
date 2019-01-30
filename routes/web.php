@@ -50,7 +50,7 @@ Route::middleware('checkuser')->prefix('/report/{slug}')->group(function()
 {
 	/*Report*/
 	Route::get('/', 'Report\ReportController@report_list');
-	Route::get('/show/{report}', 'Report\ReportController@report_show');
+	Route::get('/show/{report}', 'Report\ReportController@report_show')->name('show_report');
 	Route::get('/article/{article}', 'Report\ReportController@item_article');
 });
 
@@ -259,13 +259,16 @@ Route::middleware('checkadmin')->group(function()
  * PDF routes
  * */
 
-Route::get('/{report}/pdf_subcategory/{id}/{id_cat?}/{id_sub?}', 'Pdf\PdfController@pdf_subcategory');
+Route::get('/pdf_subcategory/{report_id}/{cat_id}/{sub_id}', 'Pdf\PdfController@pdf_subcategory');
+//Route::get('/{report}/pdf_subcategory/{id}/{id_cat?}/{id_sub?}', 'Pdf\PdfController@pdf_subcategory');
 
 Route::get('/pdf_article/{id}', 'Pdf\PdfController@pdf_article');
 
 Route::get('/pdf_item/{id}', 'Pdf\PdfController@pdf_item');
 
-Route::get('/{report}/pdf_category/{id}/{cat_id?}', 'Pdf\PdfController@pdf_category');
+Route::get('/pdf_category/{report_id}/{category_id}', 'Pdf\PdfController@pdf_category');
+
+//Route::get('/{report}/pdf_category/{id}/{cat_id?}', 'Pdf\PdfController@pdf_category');
 
 
 /*

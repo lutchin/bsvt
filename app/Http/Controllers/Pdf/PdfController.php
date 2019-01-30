@@ -193,138 +193,114 @@ class PdfController extends Controller {
 	}
 
 /**********************************************************************************************************************/
-	public function pdf_category ( $reports, $id, $cat_id = null ) {
+	public function pdf_category ($report_id,$category_id) {
 
 		$start_date = '';
 
-		switch ($reports){
+		$report = Report::find($report_id);
+		$report_slug = $report->types->slug;
 
-			case 'weekly':
-				$report = Weeklyreport::find($id);
-				$template = 'user.weeklyreview.pdf_category';
-				$find = 1;
-				break;
+		switch ($report_slug){
 
 			case 'monthly':
-				$article = Monthlyreport::find($id);
 				$template = 'user.monthlyreview.pdf_category';
-				$find = 2;
-				$start_date = $article->start_date;
 				break;
 
 			case 'yearly':
-				$report = Yearlycategory::find($id);
 				$template = 'user.yearlyreview.pdf_category';
-				$find = 4;
-				break;
-
-			case 'countrycatalog':
-				$report = Region::find($id);
-				$template = 'user.countrycatalog.pdf_category';
-				$find = 3;
 				break;
 
 			case 'various':
-				$report = Variouscategory::find($id);
 				$template = 'user.various.pdf_category';
-				$find = 7;
 				break;
 
+			default: $template= 'user.pdf.category'; break;
 		}
+		
 
-		if( $reports == 'monthly' ){
+		$articles = $report->articles()->where('category_id',$category_id)->get();
 
-			$articles = $article->articles()->where('category_id', $cat_id)->get();
+		if($articles->count() !== 0) {
 
-				if($articles->count() !== 0) {
-
-						foreach ( $articles as $index => $art ) {
-
-							$category    = $art->category != null ? $art->category->title : 'false';
-							$subcategory = $art->subcategory != null ? $art->subcategory->title : 'false';
-							$report[ $category ][ $subcategory ][] = $art;
-
-						}
+			$category = Category::find($category_id);
+			foreach ($articles as $index => $art) {
+				if ($report_slug == 'monthly') {
+//						$category    = $art->category != null ? $art->category->title : 'false';
+					$subcategory = $art->subcategory != null ? $art->subcategory->title : 'false';
+					$report_array[$subcategory][] = $art;
 				}
-		}
+				if ($report_slug == 'countrycatalog' || 'weekly') {
+//						$category    = $art->category != null ? $art->category->title : false;
+					$report_array[] = $art;
 
-		if ( $reports == 'weekly') {
-
-			$articles = $report->articles()->where( 'category_id', $cat_id )->get();
-
-				if ( $articles->count() !== 0 ) {
-
-					$article = $articles->mapToGroups( function ( $item, $key ) {
-						if ( $item->category !== null ) {
-
-							return [ $item->category->title => $item ];
-						} else {
-							return [ 0 => null ];
-						}
-					} );
 				}
+
+			}
 		}
 
-		$reporttitle = ReportType::find($find)->title;
-		$pdf = \PDF::loadView($template, compact('report', 'reporttitle', 'year', 'month', 'article', 'start_date'));
 
-		return $pdf->stream( $reporttitle.'.pdf' );
+		$pdf = \PDF::loadView($template, compact('report', 'year', 'month', 'article','report_array','category','report_slug'));
+
+		return $pdf->stream( $report->types->title.'.pdf' );
 
 	}
 
-/*********************************************************************************************************************/
-	public function pdf_subcategory ( $reports, $id , $id_cat = null, $id_sub = null ) {
+/**********************************************************************************************************************/
+	public function pdf_subcategory ($report_id , $id_cat, $id_sub) {
 
 		$start_date = '';
+		$report = Report::find($report_id);
+		$report_slug = $report->types->slug;
 
-		switch ($reports){
+
+		switch ($report_slug){
 
 			case 'monthly':
-				$report = Monthlyreport::find($id);
 				$template = 'user.monthlyreview.pdf_subcategory';
 				$find = 2;
 				$start_date = $report->start_date;
 				break;
 
 			case 'yearly':
-				$report = Yearlysubcategory::find($id);
 				$template = 'user.yearlyreview.pdf_subcategory';
 				$find = 4;
 				break;
 
 			case 'various':
-				$report = Variouscategory::find($id);
 				$template = 'user.various.pdf_subcategory';
 				$find = 7;
 				break;
 
 		}
 
-		if( $reports == 'monthly'){
+		if( $report_slug == 'monthly'){
 
 			$articles = $report->articles()->where(['category_id'=> $id_cat, 'subcategory_id'=> $id_sub])->get();
 
 				if ( $articles->count() !== 0 ) {
-					$report = [];
+					$report_array = [];
 					foreach ( $articles as $index => $article ) {
 
 					$category       = $article->category != NULL ? $article->category->title : 'false';
 					$subcategory    = $article->subcategory != NULL ? $article->subcategory->title : 'false';
-					$report[ $category ][ $subcategory ][] = $article;
+					$report_array[ $category ][ $subcategory ][] = $article;
 
 				}
 		}
 
 		}
 
+
+
 		$reporttitle = ReportType::find($find)->title;
 
-		$pdf = \PDF::loadView($template, compact('report', 'reporttitle', 'year', 'month', 'start_date'));
+		$pdf = \PDF::loadView($template, compact('report', 'reporttitle', 'year', 'month', 'start_date','report_array'));
 
 		return $pdf->stream( $reporttitle.'.pdf' );
 
 	}
 
+/**********************************************************************************************************************/
 	public function setTitle( $report ){
 
 		switch ( $report->types->slug ) {

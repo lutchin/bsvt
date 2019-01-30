@@ -84,6 +84,10 @@ class ReportController extends Controller
 
     public function item_article ( $slug,  ArticleReports $article ) {
 
+        if($slug!=$article->reports->types->slug) {
+           return redirect(route('show_report',['slug'=>$article->reports->types->slug,'report'=>$article->reports->id]))->with('status', 'Отчет не найден');
+        }
+
         $arr = [];
         if ( $article->category_id != 0 ) {
             $arr[ 'category' ] = Category::find($article->category_id)->title;
@@ -93,7 +97,8 @@ class ReportController extends Controller
         }
 
         return view('report.item_article', ['article' => $article]);
-		//++
+        //++
+
     }
 
     public function delete_report ( $slug, Report $report ) {

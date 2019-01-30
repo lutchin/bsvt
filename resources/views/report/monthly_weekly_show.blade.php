@@ -46,7 +46,12 @@ function getMonthText($m) {
     }
 
     return $m_name;
-} ?>
+}
+
+$d = date("d");
+$m = date("m");
+$y = date("Y");
+?>
 
 
 @extends('layouts.app')
@@ -54,20 +59,19 @@ function getMonthText($m) {
 @section('content')
 
     <div class="container add_form_step2 posr">
-        @if($report->types->slug=='weekly')
-            <h3 class="title">{{ $report->types->description }} № {{ $report->number }} за период от {{date("d.m.Y",$report->date_start)}} до {{date("d.m.Y",$report->date_end)}}
-                <span>
-            		<a target="_blank" href="/{{  $report->types->slug }}/pdf_item/{{ $report->id }}" class="pdf"></a>
-            	</span>
+        <h3 class="title">
+            <span>
+                @if($report->types->slug=='weekly')
+                            {{ $report->types->description }} № {{ $report->number }} за период от {{date("d.m.Y",$report->date_start)}} до {{date("d.m.Y",$report->date_end)}}
+                @elseif($report->types->slug=='monthly')
+                        {{$report->types->description}} № {{ $report->number }} ({{ getMonthText(date('m', $report->start_date)) }} {{ date('Y', $report->date_start) }})
+                @elseif($report->types->slug=='countrycatalog')
+                        Ежегодный справочник "{{ $report->types->description }}" за {{date("Y",$report->date_start)}} год
+                @endif
+                    <a target="_blank" href="/pdf_item/{{ $report->id }}" class="pdf"></a>
+               </span>
             </h3>
-        @elseif($report->types->slug=='monthly')
 
-        <h3 class="title">{{$report->types->description}} № {{ $report->number }} ({{ getMonthText(date('m', $report->start_date)) }} {{ date('Y', $report->start_date) }})
-    		<span>
-				<a target="_blank" href="/monthly/pdf_item/{{ $report->id }}" class="pdf"></a>
-			</span>
-        </h3>
-        @endif
         @if( $role != 'user' && $role !='employee' )
             <span class="pos_tr_article_out status st-{{10 + $report->status}}">
             	@if($report->status == 2)
@@ -80,6 +84,7 @@ function getMonthText($m) {
                 @endif
             </span>
     @endif
+
             @if(!empty($items))
                 <?php $n1 = 0; $n2 = 0; $n3 = 0; ?>
                 @foreach($items as  $cat => $posts)
@@ -88,25 +93,26 @@ function getMonthText($m) {
                             @if($report->types->slug=='monthly')
                                 <p class="title title_cat">
                                     {{ $n1 }}. {{ $cat }}
-                            @elseif($report->types->slug=='weekly')
+                            @elseif($report->types->slug=='weekly' || $report->types->slug=='countrycatalog')
                                 <p class="title title_cat pdf_box">
                                     <span>{{ $cat }}</span>
                             @endif
                                 <span>
-	                            <a target="_blank" href="/{{ $report->types->slug }}/pdf_category/{{ $report->id }}/{{ \App\Category::where('title',$cat)->first()->id }}" class="pdf"></a>
+	                            <a target="_blank" href="/pdf_category/{{$report->id}}/{{ \App\Category::where('title',$cat)->first()->id }}" class="pdf"></a>
                                 </span>
                             </p>
                         </div>
 
-                            @if($report->types->slug=='weekly')
+                            {{--countrycatalog--}}
+                            {{--<div class="row out_list_title">--}}
+                                {{--<p class="title">--}}
+                                    {{--{{ $posts->title }}<?dd($posts)?>--}}
+                                    {{--<a target="_blank" href="/{{ $posts->types->slug }}/pdf_category/{{ $posts->id }}" class="pdf"></a>--}}
+                                {{--</p>--}}
+                            {{--</div>--}}
 
-                            @include('report.layouts.weekly_show')
 
-                            @elseif($report->types->slug=='monthly')
-
-                                @include('report.layouts.monthly_show')
-
-                            @endif
+                            @include('report.layouts.'.$report->types->slug.'_show')
 
                 @endforeach
             @endif
@@ -124,7 +130,29 @@ function getMonthText($m) {
                     <a class="button butt_def" href="/{{ $report->types->slug }}/add2/{{ $report->id }}">Редактировать</a>
                 @endif
             </div>
-
-
     </div>
 @endsection
+
+
+@if($report->types->slug=='countrycatalog')
+    @section('scripts')
+        <script type="text/javascript" charset="utf-8">
+            jQuery(document).ready(function() {
+                jQuery('.vpor_title').on('click',function() {
+
+                    if(jQuery(this).parent('.vpor_box').hasClass('active')) {
+                        jQuery(this).parent('.vpor_box').removeClass('active');
+                        jQuery('.vpor_box .vpor_desc').fadeOut(500);
+                    } else {
+                        jQuery(this).parent('.vpor_box').addClass('active');
+                        jQuery('.vpor_box.active .vpor_desc').fadeIn(500);
+                    }
+
+                })
+            })
+
+        </script>
+    @endsection
+@endif
+
+

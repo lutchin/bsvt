@@ -55,9 +55,9 @@ function getMonthText($m) {
         {{--Тип отчета: {{ $reporttitle }}--}}
     {{--</p>--}}
 
-    <h3 class="title" style="text-align: center">{{ $reporttitle }} ({{ getMonthText(date('m', $start_date)) }} {{ date('Y', $start_date) }})</h3>
+    <h3 class="title" style="text-align: center">{{ $reporttitle }} ({{ getMonthText(date('m', $report->date_start)) }} {{ date('Y', $report->date_start) }})</h3>
     <?php /*$n1 = 0; $n2 = 0; $n3 = 0; */?>
-    @foreach($report as  $cat =>$item)
+    @foreach($report_array as  $cat =>$item)
         @if($cat != 'false')
             <?php /*$n1++;*/ ?>
             <!-- <div class="row"> -->
@@ -121,12 +121,12 @@ function getMonthText($m) {
                             {{--<h3 class="title" style="text-align: center">{{ $v->title }}</h3>--}}
                         {{--@endif--}}
                         <p>
-                            {!! $v->body !!}
+                            {!! $v->description !!}
                         </p>
 
                         <p class="pdf_gallery">
-                            @if(isset($v->monthlyimages))
-                                @foreach($v->monthlyimages as $image)
+                            @if(isset($v->images))
+                                @foreach($v->images as $image)
                                     <img style="margin-bottom: 30px; max-height: 940px" src="images/{{$image->image}}">
                                 @endforeach
                             @endif

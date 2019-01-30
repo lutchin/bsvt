@@ -1,21 +1,18 @@
 @extends('layouts.pdf')
 
 @section('content')
-<h1 style="text-align: center">{{ $reporttitle }} за {{ date("Y",$report->countrycatalog->start_date) }} год. </h1>
-<h3 style="text-align: center">{{ $report->title }}</h3>
+<h1 style="text-align: center">{{ $report->types->description }} за {{ date("Y",$report->start_date) }} год. </h1>
+<h3 style="text-align: center">{{ $category }}</h3>
 <h3 style="text-align: center">Военно-политическая обстановка в регионе</h3>
-<p><?php echo $report->overview ?></p>
+<p>{{$report->overview}}</p>
 
-    @foreach($report->countries()->get() as $infocountry)
+    @foreach($report_array as $infocountry)
 
+        @if(isset($infocountry->title))
+            <h3 style="text-align: center">{{$infocountry->title}}</h3>
+        @endif
 
-        <h3 style="text-align: center">{{$infocountry->title}}</h3>
-
-        <!-- @if(isset($infocountry->title))
-            <h3 style="text-align: center" class="title">{{ $infocountry->title }}</h3>
-        @endif -->
-
-        <p>{!!   $infocountry->overview !!}</p>
+        <p>{!!   $infocountry->description !!}</p>
 
         <p class="pdf_gallery">
             @if(isset($infocountry->images))

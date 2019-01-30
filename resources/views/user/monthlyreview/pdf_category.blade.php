@@ -55,38 +55,32 @@ function getMonthText($m) {
         {{--Тип отчета: {{ $reporttitle }}--}}
     {{--</p>--}}
 
-    <h3 class="title" style="text-align: center">{{ $reporttitle }} ({{ getMonthText(date('m', $start_date)) }} {{ date('Y', $start_date) }})</h3>
-    <?php /*$n1 = 0; $n2 = 0; $n3 = 0; */?>
-    @foreach($report as  $cat =>$item)
-        @if($cat != 'false')
-            <?php /*$n1++;*/ ?>
-            <!-- <div class="row"> -->
-                <p class="title title_cat" style="text-align: center">
-                    {{--{{ $n1 }}.--}} <strong>{{ $cat }}</strong>
-                </p>
-            <!-- </div> -->
+    <h3 class="title" style="text-align: center">{{ $report->types->description}} ({{ getMonthText(date('m', $report->date_start)) }} {{ date('Y', $report->date_start) }})</h3>
 
-            @foreach($item as  $key =>$value)
-                @if($key !== 'false')
+                <p class="title title_cat" style="text-align: center">
+                    {{--{{ $n1 }}.--}} <strong>{{ $category->title }}</strong>
+                </p>
+
+
+            @foreach($report_array as  $sub_cat =>$posts)
+                @if($sub_cat !== 'false')
                     <?php /*$n2++; */?>
                     <!-- <div class="row"> -->
                         <h3 class="title padl_sub1 title_sub_cat" style="text-align: center">
-                            {{--{{ $n1 }}.{{ $n2 }}. --}}<strong>{{ $key }}</strong>
+                            {{--{{ $n1 }}.{{ $n2 }}. --}}<strong>{{ $sub_cat  }}</strong>
                         </h3>
                     <!-- </div> -->
                 @endif
-                @foreach($value as  $k =>$v)
-                    @if(isset($v))
-                       <?php /*$n3++;*/ ?>
-                        <!-- <div class="row padl_sub2 out_list_title"> -->
+                @foreach($posts as $post)
+
                             <h3 class="pdf_box" style="text-align: center">
                                     	<span>
-
-                            <strong>{{--{{ $n1 }}.{{ $n2 }}.{{ $n3 }}. --}}{{ $v->title }}</strong>
+                            <strong>{{ $post->title }}</strong>
                             </span>
                             </h3>
-                        <!-- </div> -->
-                        <p>
+                            <p>
+                                {!! $post->description!!}
+                            </p>
                         {{--<p>Период: с {{ date("d.m.Y",$v->start_period) }} до {{ date("d.m.Y",$v->end_period) }}</p>--}}
 
                         {{--<p>--}}
@@ -117,30 +111,14 @@ function getMonthText($m) {
                                 {{--@endforeach--}}
                             {{--@endif--}}
                         {{--</p>--}}
-                        @if(isset($v->title))
-                            <!-- <h3 class="title" style="text-align: center">{{ $v->title }}</h3> -->
-                        @endif
-                        <p>
-                            {!! $v->body !!}
-                        </p>
-
                         <p class="pdf_gallery">
-                            @if(isset($v->monthlyimages))
-                                @foreach($v->monthlyimages as $image)
+                            @if(isset($$post->images))
+                                @foreach($$post->images as $image)
                                     <img style="margin-bottom: 30px; max-height: 940px" src="images/{{$image->image}}">
                                 @endforeach
                             @endif
                         </p>
-                    @endif
                     <div class="more"></div>
                 @endforeach
             @endforeach
-        @endif
-    @endforeach
-
-
-
-
-
-
 @endsection

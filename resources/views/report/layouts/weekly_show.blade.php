@@ -4,12 +4,12 @@
         <div class="row padl1 out_list_title">
             <p class="pdf_box">
                                     <span>
-                                        <a href="/weekly/article/{{ $post->id }}">
+                                        <a href="/report/weekly/article/{{ $post->id }}">
                                             <strong>{{ $post->title }}</strong>
                                         </a>
                                     </span>
                                     <span>
-                                        <a target="_blank" href="/weekly/pdf_article/{{ $post->id }}" class="pdf"></a>
+                                        <a target="_blank" href="/pdf_article/{{ $post->id }}" class="pdf"></a>
                                     </span>
             <?php
             $description = explode(' ', ltrim(html_entity_decode(strip_tags($post->description))));
