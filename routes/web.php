@@ -41,9 +41,14 @@ Route::middleware('checkuser')->group(function()
 	Route::get('/migrate', 'Migrate\MigrateController@migrate');
 	Route::get('/migrate_one', 'Migrate\MigrateController@migrate_one');
 	Route::get('/migrate_two', 'Migrate\MigrateController@migrate_two');
+	Route::get('/migrate_three', 'Migrate\MigrateController@migrate_three');
+	Route::get('/migrate_four', 'Migrate\MigrateController@migrate_four');
+	Route::get('/migrate_five', 'Migrate\MigrateController@migrate_five');
 	Route::get('/delete', 'Migrate\MigrateController@delete');
+
     /*Bug*/
 	Route::post('/bug', 'User\HomeController@bug')->name('bug');
+
 });
 
 Route::middleware('checkuser')->prefix('/report/{slug}')->group(function()
