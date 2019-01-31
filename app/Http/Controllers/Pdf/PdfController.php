@@ -55,6 +55,7 @@ class PdfController extends Controller {
 	public function pdf_item ( $id ) {
 
 		$report = Report::find($id);
+		$report_slug = $report->types->slug;
 
 		if($report->types->slug == 'plannedexhibition'){
 
@@ -162,6 +163,8 @@ class PdfController extends Controller {
 //
 //		}
 
+
+
 		if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 
 			$categories  = Category::where('report_type_id', $report->types->id)->get();
@@ -174,18 +177,27 @@ class PdfController extends Controller {
 
 		$articles    = $report->articles()->with('category')->get();
 
+
+
 		foreach ( $categories as $category ) {
+
 			foreach ( $articles as $article ) {
 				if ( $article->category_id == $category->id ) {
-					$items[ $category->title ][] = $article;
+					$subcategory = $article->subcategory != null ? $article->subcategory->title : false;
+					$items[$category->title ][$subcategory][] = $article;
 				}
 			}
+			$descriptions[] = $category->description;
+
 		}
+
+//		dd($descriptions);
+//		dd($items);
 
 		$template = 'pdf.pdf_item';
 
 		$pdf = \PDF::loadView($template,
-			compact('report', 'articles', 'items', 'categories' ), [], $format);
+			compact('report', 'items','report_slug','descriptions'), [], $format);
 
 
 		return $pdf->stream( $this->setTitle( $report ) .'.pdf' );
@@ -201,11 +213,6 @@ class PdfController extends Controller {
 		$report_slug = $report->types->slug;
 
 		switch ($report_slug){
-
-			case 'monthly':
-				$template = 'user.monthlyreview.pdf_category';
-				break;
-
 			case 'yearly':
 				$template = 'user.yearlyreview.pdf_category';
 				break;
@@ -214,7 +221,7 @@ class PdfController extends Controller {
 				$template = 'user.various.pdf_category';
 				break;
 
-			default: $template= 'user.pdf.category'; break;
+			default: $template= 'pdf.category'; break;
 		}
 		
 
@@ -224,20 +231,14 @@ class PdfController extends Controller {
 
 			$category = Category::find($category_id);
 			foreach ($articles as $index => $art) {
-				if ($report_slug == 'monthly') {
-//						$category    = $art->category != null ? $art->category->title : 'false';
-					$subcategory = $art->subcategory != null ? $art->subcategory->title : 'false';
-					$report_array[$subcategory][] = $art;
-				}
-				if ($report_slug == 'countrycatalog' || 'weekly') {
-//						$category    = $art->category != null ? $art->category->title : false;
-					$report_array[] = $art;
 
-				}
+					$subcategory = $art->subcategory != null ? $art->subcategory->title : false;
+					$report_array[$subcategory][] = $art;
 
 			}
 		}
 
+		//dd($report_array);
 
 		$pdf = \PDF::loadView($template, compact('report', 'year', 'month', 'article','report_array','category','report_slug'));
 
