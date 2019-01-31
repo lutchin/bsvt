@@ -10,8 +10,31 @@ class ArticleReports extends Model
 		'title',
 		'date_start',
 		'date_end',
+		'place',
 		'status',
 		'description',
+	];
+	use SearchableTrait;
+
+	/**
+	 * Searchable rules.
+	 *
+	 * @var array
+	 */
+	protected $searchable = [
+		/**
+		 * Columns and their priority in search results.
+		 * Columns with higher values are more important.
+		 * Columns with equal values have equal importance.
+		 *
+		 * @var array
+		 */
+		'columns' => [
+			'article_reports.title' => 10,
+			'article_reports.place' => 10,
+			'article_reports.description' => 10,
+
+		],
 	];
 
 	public function reports (){
@@ -42,7 +65,7 @@ class ArticleReports extends Model
 	}
 	public function scopeActive($query)
 	{
-		return $query->where('published', 2);
+		return $query->where('status', 2);
 	}
 	public function scopeWithout_tags ( $query ) {
 		return $query->doesnthave('countries')

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Category;
+use App\ArticleReports;
 use App\Http\Controllers\Controller;
 use App\models\analyst\exhibitions\Plannedexhibition;
 use App\models\analyst\exhibitions\Plannedexhibitionyear;
@@ -77,51 +78,22 @@ class HomeController extends Controller
 
 	    }
 
-
-        $plannedexibitions = Plannedexhibition::search($q)->active()->get();
-
-        if ( $plannedexibitions->count() != 0 ) {
-            $result[ 'plannedexhibition' ] = $plannedexibitions;
-        }
-        /*$exibitions = Exhibition::search($q, NULL, TRUE, TRUE)->active()->get();
-        if ( $exibitions->count() != 0 ) {
-            $result[ 'exhibition' ] = $exibitions;
-        }*/
-        $weeklyarticle = Weeklyarticle::search($q)->active()->get();
-        if ( $weeklyarticle->count() != 0 ) {
-            $result[ 'weekly' ] = $weeklyarticle;
-        }
-        $monthlyarticle = Monthlyarticle::search($q)->active()->get();
-        if ( $monthlyarticle->count() != 0 ) {
-            $result[ 'monthly' ] = $monthlyarticle;
-        }
-        $variousarticle = Variousarticle::search($q)->active()->get();
-        if ( $variousarticle->count() != 0 ) {
-            $result[ 'various' ] = $variousarticle;
-        }
-        $infocountries = InfoCountry::search($q)->active()->get();
-        if ( $infocountries->count() != 0 ) {
-            $result[ 'countrycatalog' ] = $infocountries;
-        }
-        $yearlyarticles = Yearlyarticle::search($q)->active()->get();
-        if ( $yearlyarticles->count() != 0 ) {
-            $result[ 'yearly' ] = $yearlyarticles;
-        }
+		$results = ArticleReports::search($q)->active()->paginate(40);
 
 
 	    if($request->ajax()){
 
-		    foreach( $plannedexibitions as $plannedexibition) {
+		    foreach( $results as $article) {
 
-			   $plannedexibition->titleTags($plannedexibition->title);
+			   $article->titleTags($article->title);
 
             }
 
-		    return   $result;
+		    return   $results;
 
 	    }
 
-        return view('user.simplysearch', compact('result'));
+        return view('user.simplysearch', compact('results'));
     }
 
     public function advanced_search_form () {
@@ -619,41 +591,50 @@ class HomeController extends Controller
     }
 
     public function findinalltables ( $start_period, $end_period, &$articles ) {
-//foreach ( Weeklyarticle::without_tags()->where([
-        foreach ( Weeklyarticle::where([
-          ['start_period', '>=', $start_period],
-          ['end_period', '<=', $end_period],
+
+
+	      foreach ( ArticleReports::where([
+          ['date_start', '>=', $start_period],
+          ['date_end', '<=', $end_period],
         ])->active()->paginate(30) as $item ) {
             $articles[ 'weekly' ][ $item->id ] = $item;
         };
 
-        foreach ( Monthlyarticle::where([
-          ['start_period', '>=', $start_period],
-          ['end_period', '<=', $end_period],
-        ])->active()->paginate(30) as $item ) {
-            $articles[ 'monthly' ][ $item->id ] = $item;
-        }
-
-        foreach ( InfoCountry::where([
-          ['start_date', '>=', $start_period],
-          ['end_date', '<=', $end_period],
-        ])->active()->paginate(30) as $item ) {
-            $articles[ 'countrycatalog' ][ $item->id ] = $item;
-        }
-
-        foreach ( Yearlyarticle::where([
-          ['start_period', '>=', $start_period],
-          ['end_period', '<=', $end_period],
-        ])->active()->paginate(30) as $item ) {
-            $articles[ 'yearly' ][ $item->id ] = $item;
-        }
-
-        foreach ( Plannedexhibition::where([
-          ['start', '>=', $start_period],
-          ['fin', '<=', $end_period],
-        ])->active()->paginate(30) as $item ) {
-            $articles[ 'plannedexhibition' ][ $item->id ] = $item;
-        }
+//foreach ( Weeklyarticle::without_tags()->where([
+//        foreach ( Weeklyarticle::where([
+//          ['start_period', '>=', $start_period],
+//          ['end_period', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'weekly' ][ $item->id ] = $item;
+//        };
+//
+//        foreach ( Monthlyarticle::where([
+//          ['start_period', '>=', $start_period],
+//          ['end_period', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'monthly' ][ $item->id ] = $item;
+//        }
+//
+//        foreach ( InfoCountry::where([
+//          ['start_date', '>=', $start_period],
+//          ['end_date', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'countrycatalog' ][ $item->id ] = $item;
+//        }
+//
+//        foreach ( Yearlyarticle::where([
+//          ['start_period', '>=', $start_period],
+//          ['end_period', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'yearly' ][ $item->id ] = $item;
+//        }
+//
+//        foreach ( Plannedexhibition::where([
+//          ['start', '>=', $start_period],
+//          ['fin', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'plannedexhibition' ][ $item->id ] = $item;
+//        }
 
         /*foreach ( Exhibition::without_tags()->where([
           ['startdate', '>=', $start_period],
@@ -661,13 +642,13 @@ class HomeController extends Controller
         ])->active()->get() as $item ) {
             $articles[ 'exhibition' ][ $item->id ] = $item;
         }*/
-
-        foreach ( Variousarticle::where([
-          ['start_period', '>=', $start_period],
-          ['end_period', '<=', $end_period],
-        ])->active()->paginate(30) as $item ) {
-            $articles[ 'various' ][ $item->id ] = $item;
-        }
+//
+//        foreach ( Variousarticle::where([
+//          ['start_period', '>=', $start_period],
+//          ['end_period', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'various' ][ $item->id ] = $item;
+//        }
 
         return $articles;
     }

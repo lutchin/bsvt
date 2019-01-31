@@ -4,33 +4,47 @@
     <h3 class="full_row_center title">Результаты поиска</h3>
     <div class="container search_result_box_items">
         <hr>
-        @foreach($result as $group => $articles)
-        
-            @foreach($articles as $article)
-<!--             
-                <a href="/{{$group}}/article/{{$article->id}}" target="_blank" class="title_link text_decor"> <?php echo $article->title;?></a> -->
+        @foreach($results as $article)
+            <div class="search_block">
+                <a href="/report/{{$article->reports->types->slug}}/article/{{$article->id}}" target="_blank" class="title_link text_decor"> <?php echo $article->title;?></a>
+                <p><!--strong>Анонс:</strong-->
+                    {{   mb_substr(ltrim(html_entity_decode(strip_tags($article->description))), 0, 400) }}
+                </p>
+                <p>
+                    <strong>Отчет:</strong> Еженедельный дайжест "Еженедельный обзор ВПО и ВТИ" за период от {{date("d.m.Y",$article->reports->date_start)}} по {{date("d.m.Y",$article->reports->date_end)}}
+                </p>
+                <p><strong>Раздел:</strong>
+                    @if(isset($article->subcategory))
+                        <span>{{ $article->subcategory->category->title }}</span></p>
+                @elseif(isset($article->category))
+                    <span>{{ $article->category->title }}</span></p>
+                @elseif($article->reports->types->slug == 'plannedexhibition')
+                    <span> Планируемые выставки {{ date("Y",$article->reports->date_start) }}</span></p>
+                @endif
 
-                @switch($group)
-                    @case('weekly')
+            </div>
+
+
+
+                @switch($article->id)
+                    @case(0)
                     <div class="search_block">
-                    <a href="/{{$group}}/article/{{$article->id}}" target="_blank" class="title_link text_decor"> <?php echo $article->title;?></a>
+                    <a href="report/{{$group}}/article/{{$article->id}}" target="_blank" class="title_link text_decor"> <?php echo $article->title;?></a>
                     <p><!--strong>Анонс:</strong-->
-                        {{   mb_substr(ltrim(html_entity_decode(strip_tags($article->body))), 0, 400) }}
+                        {{   mb_substr(ltrim(html_entity_decode(strip_tags($article->description))), 0, 400) }}
                     </p>
                     <p>
-                        <strong>Отчет:</strong> Еженедельный дайжест "Еженедельный обзор ВПО и ВТИ" за период от {{date("d.m.Y",$article->weeklyreport->start_date)}} по {{date("d.m.Y",$article->weeklyreport->end_date)}}
+                        <strong>Отчет:</strong> Еженедельный дайжест "Еженедельный обзор ВПО и ВТИ" за период от {{date("d.m.Y",$article->reports->date_start)}} по {{date("d.m.Y",$article->reports->date_end)}}
                     </p>
                     <p><strong>Раздел:</strong>
                       @if(isset($article->subcategory))
                           <span>{{ $article->subcategory->category->title }}</span></p>
                       @elseif(isset($article->category))
                           <span>{{ $article->category->title }}</span></p>
-                      @elseif(isset($article->plannedexhibitionyear))
-                          <span> Планируемые выставки {{ $article->plannedexhibitionyear->year }}</span></p>
-                      @elseif(isset($article->exhibitionyear))
-                          <span> Планируемые выставки {{ $article->exhibitionyear->year }}</span></p>
+                      @elseif($article->reports->types->slug == 'plannedexhibition')
+                          <span> Планируемые выставки {{ date("Y",$article->reports->date_start) }}</span></p>
                       @endif
-                    </p>
+
                     </div>
                     @break
 
@@ -228,8 +242,9 @@
                     @endif
                     </p> -->
                     <!-- <hr> -->
+
                     @endforeach
-                    @endforeach
+        <div class="pagination">{{$results->links()}}</div>
                     <div class="row box_save_article mt30">
                         <a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
                     </div>
