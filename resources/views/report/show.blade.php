@@ -1,53 +1,5 @@
-<?php $role = Auth::user()->roles[0]->title;
+<?php $role = Auth::user()->roles[0]->title;?>
 
-function m_name($m) {
-	switch ( $m ) {
-		case 1:
-			$m_name = 'января';
-			break;
-		case 2:
-			$m_name = 'февраля';
-			break;
-		case 3:
-			$m_name = 'марта';
-			break;
-		case 4:
-			$m_name = 'апреля';
-			break;
-		case 5:
-			$m_name = 'мая';
-			break;
-		case 6:
-			$m_name = 'июня';
-			break;
-		case 7:
-			$m_name = 'июля';
-			break;
-		case 8:
-			$m_name = 'августа';
-			break;
-		case 9:
-			$m_name = 'сентября';
-			break;
-		case 10:
-			$m_name = 'октября';
-			break;
-		case 11:
-			$m_name = 'ноября';
-			break;
-		case 12:
-			$m_name = 'декабря';
-			break;
-		default:
-			$m      = "Ошибка даты";
-			$m_name = "";
-			break;
-
-	}
-	return $m_name;
-}
-
-?>
 @extends('layouts.app')
 
 @section('content')
@@ -55,7 +7,7 @@ function m_name($m) {
 	<div class="container add_form_step2 posr">
 		<h3 class="title">{{ $report->types->description }}
 			@if( $report->types->slug == 'weekly' || $report->types->slug == 'monthly' )
-				№ {{ $report->number }} за период от {{date("d",$report->date_start)}} {{m_name(date("m",$report->date_start))}} {{date("Y",$report->date_start)}} года по {{date("d",$report->date_end)}} {{m_name(date("m",$report->date_end))}} {{date("Y",$report->date_end)}} года
+				№ {{ $report->number }} за период от {{date("d",$report->date_start)}} {{Helper::getMonthText(date("m",$report->date_start))}} {{date("Y",$report->date_start)}} года по {{date("d",$report->date_end)}} {{m_name(date("m",$report->date_end))}} {{date("Y",$report->date_end)}} года
 			@else
 				за {{ date("Y",$report->date_start) }} год.
 			@endif

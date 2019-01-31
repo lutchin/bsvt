@@ -11,15 +11,16 @@
 
     @if(!empty($items))
         @foreach($items as  $category =>$sub_cats)
-
+            @if($category!==0)
             <h3 class="title title_cat" style="text-align: center">{{ $category}}</h3>
+            @endif
             @if($report_slug == 'countrycatalog' && $descriptions[$loop->index])
             <h3 style="text-align: center">Военно-политическая обстановка в регионе</h3>
             <p>{!! $descriptions[$loop->index] !!}</p>
             @endif
             @foreach($sub_cats as  $sub_cat =>$posts)
 
-            @if($sub_cat)
+            @if($sub_cat!==0)
                 <h3 class="title padl_sub1 title_sub_cat" style="text-align: center">
                     <strong>{{ $sub_cat  }}</strong>
                 </h3>

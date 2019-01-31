@@ -22,7 +22,7 @@ class ReportController extends Controller
 
     public function __construct () {
         $this->middleware('auth');
-        $this->reports();
+       // $this->reports(); //problem
 
     }
 
@@ -65,25 +65,28 @@ class ReportController extends Controller
 
 	    $articles    = $report->articles()->where('report_id', $report->id )->get();
 
-        //dump($articles);
+        //dd($articles[0]);
         //dump($categories);
 
-	    foreach ( $categories as $category ) {
+//
 		    foreach ( $articles as $article ) {
+                if($article->category_id)
+                foreach ( $categories as $category ) {
 			    if ( $article->category_id == $category->id ) {
-
-				    $subcategory = $article->subcategory != NULL ? $article->subcategory->title : false;
-                   // dump();
-                    if($subcategory) $items[ $category->title ][$subcategory] [] = $article;
-				    else $items[ $category->title ] [] = $article;
+				    $subcategory = $article->subcategory_id != false ?  $article->subcategory->title: false; // problem
+                    $items[ $category->title ][$subcategory] [] = $article;
+                    //Subcategory::select('title')->where('id',$article->subcategory_id)->get()
 			    }
 		    }
+                else {
+                    $subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
+                    $items[ false][$subcategory] [] = $article;
+                }
 	    }
 
-
-//            dd($report->id);
-//         dd($report->categories);
-
+//        dd(Subcategory::where('title','Итоговая часть')->get());
+//        dump($items);
+       // return 123;
         return view('report.monthly_weekly_show', compact('report', 'items'));
     }
 

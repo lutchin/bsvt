@@ -41,7 +41,8 @@
                                 @if($report_type->slug == 'weekly' || $report_type->slug == 'monthly' )
                                 № {{ $item['number'] }} за период от {{ date("d.m",$item['date_start'])  }} до {{ date("d.m.Y",$item['date_end']) }}
                                 @else
-                                за {{ date("Y",$item['date_end']) }} год.
+                                за {{ date("Y",$item['date_start']) }} год. {{$item['date_start']  }}
+
                                 @endif
                             </a>
                             @if( $role != 'user' && $role !='employee' )
