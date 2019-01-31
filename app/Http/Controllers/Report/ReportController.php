@@ -48,6 +48,11 @@ class ReportController extends Controller
 
     public function report_show ( $slug , Report $report ) {
 
+        if($report->types->slug!=$slug) {
+           return redirect('/')->with('status', 'Отчет не найден');
+        }
+
+
 	    if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 
 		    $categories  = Category::where('report_type_id', $report->types->id)->get();
@@ -75,9 +80,10 @@ class ReportController extends Controller
 		    }
 	    }
 
-	    //$slug = 'monthly';
-	   // return view('report.'.$slug.'.show', compact('report', 'items'));
-        
+
+//            dd($report->id);
+//         dd($report->categories);
+
         return view('report.monthly_weekly_show', compact('report', 'items'));
     }
 
