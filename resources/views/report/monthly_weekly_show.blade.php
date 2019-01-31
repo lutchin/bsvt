@@ -1,53 +1,5 @@
 <?php $role = Auth::user()->roles[0]->title;
 
-function getMonthText($m) {
-    switch ( $m ) {
-        case 1:
-            $m_name = 'январь';
-            break;
-        case 2:
-            $m_name = 'февраль';
-            break;
-        case 3:
-            $m_name = 'март';
-            break;
-        case 4:
-            $m_name = 'апрель';
-            break;
-        case 5:
-            $m_name = 'май';
-            break;
-        case 6:
-            $m_name = 'июнь';
-            break;
-        case 7:
-            $m_name = 'июль';
-            break;
-        case 8:
-            $m_name = 'август';
-            break;
-        case 9:
-            $m_name = 'сентябрь';
-            break;
-        case 10:
-            $m_name = 'октябрь';
-            break;
-        case 11:
-            $m_name = 'ноябрь';
-            break;
-        case 12:
-            $m_name = 'декабрь';
-            break;
-        default:
-            $m      = "Ошибка даты";
-            $m_name = "";
-            break;
-
-    }
-
-    return $m_name;
-}
-
 $d = date("d");
 $m = date("m");
 $y = date("Y");
@@ -62,11 +14,13 @@ $y = date("Y");
         <h3 class="title">
             <span>
                 @if($report->types->slug=='weekly')
-                            {{ $report->types->description }} № {{ $report->number }} за период от {{date("d.m.Y",$report->date_start)}} до {{date("d.m.Y",$report->date_end)}}
+                            {{ $report->types->title }} № {{ $report->number }} за период от {{date("d.m.Y",$report->date_start)}} до {{date("d.m.Y",$report->date_end)}}
                 @elseif($report->types->slug=='monthly')
-                        {{$report->types->description}} № {{ $report->number }} ({{ getMonthText(date('m', $report->start_date)) }} {{ date('Y', $report->date_start) }})
+                        {{$report->types->title}} № {{ $report->number }} ({{ Helper::getMonthText(date('m', $report->date_start)) }} {{ date('Y', $report->date_start) }})
                 @elseif($report->types->slug=='countrycatalog')
-                        Ежегодный справочник "{{ $report->types->description }}" за {{date("Y",$report->date_start)}} год
+                        Ежегодный справочник "{{ $report->types->title }}" за {{date("Y",$report->date_start)}} год
+                    @elseif($report->types->slug=='yearly')
+                    Ежегодный справочник "{{ $report->types->title}}" <!--№ {{ $report->number }}--> за {{date("Y",$report->date_start)}} год
                 @endif
                     <a target="_blank" href="/pdf_item/{{ $report->id }}" class="pdf"></a>
                </span>
@@ -85,7 +39,102 @@ $y = date("Y");
             </span>
     @endif
 
+
+
             @if(!empty($items))
+                @if($report->types->slug=='yearly')
+
+                        @foreach($items as  $report)
+                            @if(!empty($report->articlesReport))
+                                @foreach($report->articlesReport as  $article)
+                                    <div class="row padl_sub2 out_list_title">
+                                        <p class="pdf_box">
+                                            <a href="/yearly/article/{{ $article->id }}">
+                                                <strong>{{ $article->title }}</strong>
+                                            </a>
+                                            <a target="_blank" href="/yearly/pdf_article/{{ $article->id }}" class="pdf"></a>
+                                        </p>
+                                        <?php
+                                        $description = explode(' ', ltrim(html_entity_decode(strip_tags($article->body))));
+                                        count($description) <40 ? $count = count($description): $count = 40;
+                                        $descrurtion_short = implode(' ', array_slice($description,0, $count));
+                                        ?>
+                                        <p style="text-align: justify">
+                                            <span>{{$descrurtion_short}}...</span>
+                                        </p>
+                                    </div>
+                                @endforeach
+                            @endif
+                            @if(!empty($report->categories))
+                                @foreach($report->categories as  $category)
+                                    <div class="row out_list_title mt10">
+                                        <p class="title">
+                                            {{ $category->title }}
+                                            <span>
+                                            <a target="_blank" href="/yearly/pdf_category/{{ $category->id }}" class="pdf"></a>
+                                        </span>
+                                        </p>
+                                        @if(!empty($category->articles))
+                                            @foreach($category->articles as  $catarticle)
+                                                <div class="row padl_sub2 out_list_title">
+                                                    <p class="pdf_box">
+                                                        <a href="/yearly/article/{{ $catarticle->id }}">
+                                                            <strong>{{ $catarticle->title }}</strong>
+                                                        </a>
+                                                        <a target="_blank" href="/yearly/pdf_article/{{ $catarticle->id }}" class="pdf"></a>
+                                                    </p>
+                                                    <?php
+                                                    $description = explode(' ', ltrim(html_entity_decode(strip_tags($catarticle->body))));
+                                                    count($description) <40 ? $count = count($description): $count = 40;
+                                                    $descrurtion_short = implode(' ', array_slice($description,0, $count));
+                                                    ?>
+                                                    <p style="text-align: justify">
+                                                        <span>{{$descrurtion_short}}...</span>
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                    @if(!empty($category->subcategories))
+                                        @foreach($category->subcategories as  $subcategory)
+                                            <div class="row padl_sub1 out_list_title">
+
+                                                <p class="pdf_box">
+                                                    {{ $subcategory->title }}
+                                                    <span>
+                                                        <a target="_blank" href="/yearly/pdf_subcategory/{{ $subcategory->id }}" class="pdf"></a>
+                                                    </span>
+                                                </p>
+
+                                                @if(!empty($subcategory->articles))
+                                                    @foreach($subcategory->articles as  $article)
+                                                        <div class="row padl_sub2 out_list_title">
+                                                            <p class="pdf_box">
+                                                                <a href="/yearly/article/{{ $article->id }}">
+                                                                    {{ $article->title }}
+                                                                </a>
+                                                                <a target="_blank" href="/yearly/pdf_article/{{ $article->id }}" class="pdf"></a>
+                                                            </p>
+                                                            <?php
+                                                            $description = explode(' ', ltrim(html_entity_decode(strip_tags($article->body))));
+                                                            count($description) <40 ? $count = count($description): $count = 40;
+                                                            $descrurtion_short = implode(' ', array_slice($description,0, $count));
+                                                            ?>
+                                                            <p style="text-align: justify">
+                                                                <span>{{$descrurtion_short}}...</span>
+                                                            </p>
+                                                        </div>
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                @endforeach
+                            @endif
+                        @endforeach
+                @else
+
+
                 <?php $n1 = 0; $n2 = 0; $n3 = 0; ?>
                 @foreach($items as  $cat => $posts)
                         <?php $n1++; ?>
@@ -115,6 +164,7 @@ $y = date("Y");
                             @include('report.layouts.'.$report->types->slug.'_show')
 
                 @endforeach
+                    @endif
             @endif
 
 
