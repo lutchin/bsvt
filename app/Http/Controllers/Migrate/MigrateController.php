@@ -80,10 +80,10 @@ class MigrateController extends Controller
 				    $article = new ArticleReports();
 
 				    $article->reports()->associate( $report_new );
-				    $countries = Country::find( $weeklyarticle->countries );
-				    $companies = Company::find( $weeklyarticle->company );
-				    $vvttypes = VvtType::find( $weeklyarticle->vvtpypes );
-				    $personalities = Personality::find( $weeklyarticle->personality );
+				    $countries     = Country::find( $weeklyarticle->countries );
+				    $companies     = Company::find( $weeklyarticle->companies );
+				    $vvttypes      = VvtType::find( $weeklyarticle->vvttypes );
+				    $personalities = Personality::find( $weeklyarticle->personalities );
 				    $images = $weeklyarticle->weeklyimages;
 
 				    $article->category_id = $category->id;
@@ -137,7 +137,7 @@ class MigrateController extends Controller
 
 					    foreach ( $vvttypes as $vvttype ) {
 
-						    $article->$vvttypes()->save( $vvttype );
+						    $article->vvttypes()->save( $vvttype );
 
 					    }
 
@@ -205,9 +205,9 @@ class MigrateController extends Controller
 
 						$article->reports()->associate( $report_new );
 						$countries     = Country::find( $weeklyarticle->countries );
-						$companies     = Company::find( $weeklyarticle->company );
-						$vvttypes      = VvtType::find( $weeklyarticle->vvtpypes );
-						$personalities = Personality::find( $weeklyarticle->personality );
+						$companies     = Company::find( $weeklyarticle->companies );
+						$vvttypes      = VvtType::find( $weeklyarticle->vvttypes );
+						$personalities = Personality::find( $weeklyarticle->personalities );
 						$images        = $weeklyarticle->monthlyimages;
 
 						$article->category_id = $category->id;
@@ -262,7 +262,7 @@ class MigrateController extends Controller
 
 							foreach ( $vvttypes as $vvttype ) {
 
-								$article->$vvttypes()->save( $vvttype );
+								$article->vvttypes()->save( $vvttype );
 
 							}
 
@@ -345,9 +345,9 @@ class MigrateController extends Controller
 
 						$article->reports()->associate( $report_new );
 						$countries     = Country::find( $weeklyarticle->countries );
-						$companies     = Company::find( $weeklyarticle->company );
-						$vvttypes      = VvtType::find( $weeklyarticle->vvtpypes );
-						$personalities = Personality::find( $weeklyarticle->personality );
+						$companies     = Company::find( $weeklyarticle->companies );
+						$vvttypes      = VvtType::find( $weeklyarticle->vvttypes );
+						$personalities = Personality::find( $weeklyarticle->personalities );
 						$images        = $weeklyarticle->images;
 
 						$article->category_id = $category_new->id;
@@ -402,7 +402,7 @@ class MigrateController extends Controller
 
 							foreach ( $vvttypes as $vvttype ) {
 
-								$article->$vvttypes()->save( $vvttype );
+								$article->vvttypes()->save( $vvttype );
 
 							}
 
@@ -453,9 +453,9 @@ class MigrateController extends Controller
 
 				//$article_new->reports()->associate( $report_new );
 				$countries     = Country::find( $article->countries );
-				$companies     = Company::find( $article->company );
-				$vvttypes      = VvtType::find( $article->vvtpypes );
-				$personalities = Personality::find( $article->personality );
+				$companies     = Company::find( $article->companies );
+				$vvttypes      = VvtType::find( $article->vvttypes );
+				$personalities = Personality::find( $article->personalities );
 				$images        = $article->images ;
 
 				if ( isset( $report_new ) ) {
@@ -517,7 +517,7 @@ class MigrateController extends Controller
 
 					foreach ( $vvttypes as $vvttype ) {
 
-						$article->$vvttypes()->save( $vvttype );
+						$article->vvttypes()->save( $vvttype );
 
 					}
 
@@ -564,9 +564,9 @@ class MigrateController extends Controller
 
 				//$article_new->reports()->associate( $report_new );
 				$countries     = Country::find( $article->countries );
-				$companies     = Company::find( $article->company );
-				$vvttypes      = VvtType::find( $article->vvtpypes );
-				$personalities = Personality::find( $article->personality );
+				$companies     = Company::find( $article->companies );
+				$vvttypes      = VvtType::find( $article->vvttypes );
+				$personalities = Personality::find( $article->personalities );
 				$images        = $article->images;
 
 				if ( isset( $report_new ) ) {
@@ -628,7 +628,7 @@ class MigrateController extends Controller
 
 					foreach ( $vvttypes as $vvttype ) {
 
-						$article->$vvttypes()->save( $vvttype );
+						$article->vvttypes()->save( $vvttype );
 
 					}
 
@@ -671,9 +671,9 @@ class MigrateController extends Controller
 
 					//$article_new->reports()->associate( $report_new );
 					$countries     = Country::find( $article->countries );
-					$companies     = Company::find( $article->company );
-					$vvttypes      = VvtType::find( $article->vvtpypes );
-					$personalities = Personality::find( $article->personality );
+					$companies     = Company::find( $article->companies );
+					$vvttypes      = VvtType::find( $article->vvttypes );
+					$personalities = Personality::find( $article->personalities );
 					$images        = $article->images;
 
 					if ( isset( $report_new ) ) {
@@ -735,7 +735,7 @@ class MigrateController extends Controller
 
 						foreach ( $vvttypes as $vvttype ) {
 
-							$article->$vvttypes()->save( $vvttype );
+							$article->vvttypes()->save( $vvttype );
 
 						}
 
@@ -794,9 +794,9 @@ class MigrateController extends Controller
 
 							$article->reports()->associate( $report_new );
 							$countries     = Country::find( $weeklyarticle->countries );
-							$companies     = Company::find( $weeklyarticle->company );
-							$vvttypes      = VvtType::find( $weeklyarticle->vvtpypes );
-							$personalities = Personality::find( $weeklyarticle->personality );
+							$companies     = Company::find( $weeklyarticle->companies );
+							$vvttypes      = VvtType::find( $weeklyarticle->vvttypes );
+							$personalities = Personality::find( $weeklyarticle->personalities );
 							$images        = $weeklyarticle->images;
 
 
@@ -851,7 +851,7 @@ class MigrateController extends Controller
 
 								foreach ( $vvttypes as $vvttype ) {
 
-									$article->$vvttypes()->save( $vvttype );
+									$article->vvttypes()->save( $vvttype );
 
 								}
 
@@ -911,9 +911,9 @@ class MigrateController extends Controller
 
 				$article->reports()->associate( $report_new );
 				$countries     = Country::find( $weeklyarticle->countries );
-				$companies     = Company::find( $weeklyarticle->company );
-				$vvttypes      = VvtType::find( $weeklyarticle->vvtpypes );
-				$personalities = Personality::find( $weeklyarticle->personality );
+				$companies     = Company::find( $weeklyarticle->companies );
+				$vvttypes      = VvtType::find( $weeklyarticle->vvttypes );
+				$personalities = Personality::find( $weeklyarticle->personalities );
 				$images        = $weeklyarticle->images;
 
 
@@ -968,7 +968,7 @@ class MigrateController extends Controller
 
 					foreach ( $vvttypes as $vvttype ) {
 
-						$article->$vvttypes()->save( $vvttype );
+						$article->vvttypes()->save( $vvttype );
 
 					}
 
