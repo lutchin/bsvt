@@ -152,16 +152,7 @@ $y = date("Y");
                             </p>
                         </div>
 
-                            {{--countrycatalog--}}
-                            {{--<div class="row out_list_title">--}}
-                                {{--<p class="title">--}}
-                                    {{--{{ $posts->title }}<?dd($posts)?>--}}
-                                    {{--<a target="_blank" href="/{{ $posts->types->slug }}/pdf_category/{{ $posts->id }}" class="pdf"></a>--}}
-                                {{--</p>--}}
-                            {{--</div>--}}
-
-
-                            @include('report.layouts.'.$report->types->slug.'_show')
+                        @include('report.layouts.'.$report->types->slug.'_show')
 
                 @endforeach
                     @endif
