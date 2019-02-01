@@ -4,9 +4,11 @@
     <!-- <div class="pdf_wrap"> -->
         <h1 class="pdf_title"> {{ $title }} </h1>
         <!-- <div class="row cat"> -->
+    @if($article->category_id)
             <h3 class="title title_cat">
                 {{ $article->category->title }}
             </h3>
+    @endif
             @if(isset($article->subcategory))
             <h3 style="text-align: center; margin-top: -10px">{{ $article->subcategory->title }}</h3>
             @endif

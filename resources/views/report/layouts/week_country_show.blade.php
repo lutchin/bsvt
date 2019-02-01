@@ -1,7 +1,5 @@
-
-
-
 @if(!empty($report->articles))
+    @if($report->types->slug=='countrycatalog')
     <div class="row padl_sub2 out_list_title">
         <div class="pdf_box">
             <div class="vpor_box">
@@ -24,16 +22,18 @@
             </div>
         </div>
     </div>
-    @foreach($posts as  $country)
+    @endif
 
+    @foreach($subcats as  $posts)
+        @foreach($posts as $post)
         <div class="row padl_sub1 out_list_title">
             <p class="pdf_box">
-                <a href="/report/{{$report->types->slug}}/article/{{ $country->id }}">
-                    {{ $country->title }}
+                <a href="/report/{{$report->types->slug}}/article/{{ $post->id }}">
+                    {{ $post->title }}
                 </a>
-                <a target="_blank" href="/pdf_article/{{ $country->id }}" class="pdf"></a>
+                <a target="_blank" href="/pdf_article/{{ $post->id }}" class="pdf"></a>
             <?php
-            $description = explode(' ', ltrim(html_entity_decode(strip_tags($country->description))));
+            $description = explode(' ', ltrim(html_entity_decode(strip_tags($post->description))));
             count($description) <40 ? $count = count($description): $count = 40;
             $descrurtion_short = implode(' ', array_slice($description,0, $count));
             ?>
@@ -41,16 +41,16 @@
                 <span>{{$descrurtion_short}}...</span>
             </p>
             @if( $role != 'user' && $role !='employee' )
-                @if($country->status == 0 && $report->status!=2)
+                @if($post->status == 0 && $report->status!=2)
                     <span class="status st-line st-0">| Не утверждено</span>
-                @elseif($country->status == 1 && $report->status!=2)
+                @elseif($post->status == 1 && $report->status!=2)
                     <span class="status st-line st-1">| Ожидает утверждения</span>
-                @elseif($country->status == 2 && $report->status!=2)
+                @elseif($post->status == 2 && $report->status!=2)
                     <span class="status st-line st-2">| Утверждено</span>
                     @endif
-                    @endif
+                @endif
             </p>
         </div>
-
+        @endforeach
     @endforeach
 @endif
