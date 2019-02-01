@@ -20,6 +20,8 @@ $y = date("Y");
                         Ежегодный справочник "{{ $report->types->title }}" за {{date("Y",$report->date_start)}} год
                     @elseif($report->types->slug=='yearly')
                     Ежегодный справочник "{{$report->types->title}}" <!--№ {{ $report->number }}--> за {{date("Y",$report->date_start)}} год
+                    @elseif($report->types->slug=='various')
+                    {{$report->types->title}}
                 @endif
                     <a target="_blank" href="/pdf_item/{{ $report->id }}" class="pdf"></a>
                </span>
@@ -58,7 +60,7 @@ $y = date("Y");
                                 </div>
                             @endif
 
-                            @if($report->types->slug=='weekly' || $report->types->slug=='countrycatalog')
+                            @if($report->types->slug=='weekly' || $report->types->slug=='countrycatalog' || $report->types->slug=='various')
                                 @include('report.layouts.week_country_show')
                             @elseif($report->types->slug=='yearly')
                             @include('report.layouts.yearly_show')
@@ -74,12 +76,11 @@ $y = date("Y");
                     <a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
                 @endif
                 @if( $role != 'user' && $role !='employee' )
-                    <a class="button butt_def" href="/{{ $report->types->slug }}/add2/{{ $report->id }}">Редактировать</a>
+                    <a class="button butt_def" href="/report/{{$report->types->slug}}/add2/{{ $report->id }}">Редактировать</a>
                 @endif
             </div>
     </div>
 @endsection
-
 
 
 @if($report->types->slug=='countrycatalog')
@@ -98,7 +99,6 @@ $y = date("Y");
 
                 })
             })
-
         </script>
     @endsection
 @endif

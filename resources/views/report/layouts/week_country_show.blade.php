@@ -26,12 +26,17 @@
 
     @foreach($subcats as  $posts)
         @foreach($posts as $post)
-        <div class="row padl_sub1 out_list_title">
+        <div class="row @if($report->types->slug=='various') padl_sub2  @else padl_sub1 @endif out_list_title">
             <p class="pdf_box">
+
                 <a href="/report/{{$report->types->slug}}/article/{{ $post->id }}">
+                    <span>
                     {{ $post->title }}
+                    </span>
                 </a>
+
                 <a target="_blank" href="/pdf_article/{{ $post->id }}" class="pdf"></a>
+
             <?php
             $description = explode(' ', ltrim(html_entity_decode(strip_tags($post->description))));
             count($description) <40 ? $count = count($description): $count = 40;

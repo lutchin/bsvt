@@ -179,6 +179,7 @@ Route::middleware('checkanalyst')->prefix('/report/{slug}')->group(function()
    // Route::get('/plannedexhibition/upd/{plannedexhibition}', 'Analyst\PlannedexhibitionController@upd_form');
     //Route::put('/plannedexhibition/upd/{flag?}', 'Analyst\PlannedexhibitionController@update'); //+
     //Route::put('/plannedexhibition/publish/{plannedexhibitionyear}', 'Analyst\PlannedexhibitionController@publish');
+	
     /*Route::put('/plannedexhibition/for_approval/{plannedexhibitionyear}', 'Analyst\PlannedexhibitionController@for_approval');*/
     //Route::put('/plannedexhibition/article_publish/{plannedexhibition}', 'Analyst\PlannedexhibitionController@article_publish');
     //Route::put('/plannedexhibition/article_for_approval/{plannedexhibition}', 'Analyst\PlannedexhibitionController@article_for_approval');
@@ -204,6 +205,7 @@ Route::middleware('checkanalyst')->prefix('/report/{slug}')->group(function()
   //  Route::get('/various/upd/{variousarticle}', 'Analyst\VariousController@upd_form');
  //   Route::put('/various/upd/{flag?}', 'Analyst\VariousController@update');//++
  //   Route::put('/various/publish/{variousreport}', 'Analyst\VariousController@publish');
+
     /*Route::put('/various/for_approval/{variousreport}', 'Analyst\VariousController@for_approval');*/
  // Route::put('/various/article_publish/{variousarticle}/{variousreport}', 'Analyst\VariousController@article_publish');
   //  Route::put('/various/article_for_approval/{variousarticle}', 'Analyst\VariousController@article_for_approval');

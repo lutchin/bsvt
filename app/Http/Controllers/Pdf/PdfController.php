@@ -40,14 +40,17 @@ class PdfController extends Controller {
 		$article = ArticleReports::find($id);
 
 		$report = $article->reports;
+		$report_slug = $report->types->slug;
+		$template = 'pdf.pdf_item';
 
-		$template = 'pdf.article';
+		$category       = $article->category_id != false ? $article->category->title : false;
+		$subcategory    = $article->subcategory_id != false ? $article->subcategory->title : false;
+		$items[$category][$subcategory][] = $article;
 
-		$title = $this->setTitle( $report );
-    
-		$pdf = \PDF::loadView($template, compact('article', 'title', 'report'));
 
-		return $pdf->stream( $title .'.pdf' );
+		$pdf = \PDF::loadView($template, compact('report','items','report_slug'));
+
+		return $pdf->stream( $report->types->title .'.pdf' );
 
 	}
 
@@ -66,6 +69,7 @@ class PdfController extends Controller {
 			$format = ['format' => 'A4'];
 
 		}
+
 //		switch ($reports){
 //
 //			case 'weekly':
@@ -163,8 +167,6 @@ class PdfController extends Controller {
 //
 //		}
 
-
-
 		if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 
 			$categories  = Category::where('report_type_id', $report->types->id)->get();
@@ -174,6 +176,7 @@ class PdfController extends Controller {
 			$categories  = Category::where('report_id', $report->id)->get();
 
 		}
+
 
 		$articles    = $report->articles()->with('category')->get();
 
@@ -201,10 +204,7 @@ class PdfController extends Controller {
 
 		$template = 'pdf.pdf_item';
 
-		$pdf = \PDF::loadView($template,
-			compact('report', 'items','report_slug','descriptions'), [], $format);
-
-
+		$pdf = \PDF::loadView($template, compact('report', 'items','report_slug','descriptions'), [], $format);
 		return $pdf->stream( $this->setTitle( $report ) .'.pdf' );
 
 	}
@@ -212,24 +212,10 @@ class PdfController extends Controller {
 /**********************************************************************************************************************/
 	public function pdf_category ($report_id,$category_id) {
 
-		$start_date = '';
-
 		$report = Report::find($report_id);
 		$report_slug = $report->types->slug;
 
-		switch ($report_slug){
-//			case 'yearly':
-//				$template = 'user.yearlyreview.pdf_category';
-//				break;
-
-			case 'various':
-				$template = 'user.various.pdf_category';
-				break;
-
-			default: $template= 'pdf.category'; break;
-		}
-		
-
+		$template = 'pdf.pdf_item';
 		$articles = $report->articles()->where('category_id',$category_id)->get();
 
 		if($articles->count() !== 0) {
@@ -237,16 +223,17 @@ class PdfController extends Controller {
 			$category = Category::find($category_id);
 			foreach ($articles as $index => $art) {
 
-					$subcategory = $art->subcategory != null ? $art->subcategory->title : false;
-					$report_array[$subcategory][] = $art;
+					$subcategory = $art->subcategory_id != false ? $art->subcategory->title : false;
+					$items[$category->title][$subcategory][] = $art;
 
 			}
+			$descriptions[] = $category->description;
 		}
 
+//		dd($items);
 		//dd($report_array);
 
-		$pdf = \PDF::loadView($template, compact('report', 'year', 'month', 'article','report_array','category','report_slug'));
-
+		$pdf = \PDF::loadView($template, compact('report','items','report_slug','descriptions'));
 		return $pdf->stream( $report->types->title.'.pdf' );
 
 	}
@@ -254,35 +241,24 @@ class PdfController extends Controller {
 /**********************************************************************************************************************/
 	public function pdf_subcategory ($report_id , $id_cat, $id_sub) {
 
-		$start_date = '';
 		$report = Report::find($report_id);
 		$report_slug = $report->types->slug;
 
-
-		switch ($report_slug){
-			case 'various':
-				$template = 'user.various.pdf_subcategory';
-				break;
-			default: $template = 'pdf.month_yearl_subcat'; break;
-		}
-
-		if( $report_slug == 'monthly' || $report_slug == 'yearly'){
+		$template = 'pdf.pdf_item';
 			$articles = $report->articles()->where(['category_id'=> $id_cat, 'subcategory_id'=> $id_sub])->get();
 				if ( $articles->count() !== 0 ) {
-					$report_array = [];
+					$items = [];
 					foreach ( $articles as $index => $article ) {
 
-					$category       = $article->category != NULL ? $article->category->title : 'false';
-					$subcategory    = $article->subcategory != NULL ? $article->subcategory->title : 'false';
-					$report_array[ $category ][ $subcategory ][] = $article;
+					$category       = $article->category_id != false ? $article->category->title : false;
+					$subcategory    = $article->subcategory_id != false ? $article->subcategory->title : false;
+					$items[ $category ][ $subcategory ][] = $article;
 				}
 			}
 
-		}
-
 		//dd($report_array);
 
-		$pdf = \PDF::loadView($template, compact('report', 'year', 'month', 'start_date','report_array'));
+		$pdf = \PDF::loadView($template, compact('report','items','report_slug'));
 		return $pdf->stream( $report->types->title.'.pdf' );
 
 	}

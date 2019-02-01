@@ -45,13 +45,11 @@ class ReportController extends Controller
 
     }
 
-
     public function report_show ( $slug , Report $report ) {
 
         if($report->types->slug!=$slug) {
            return redirect('/')->with('status', 'Отчет не найден');
         }
-
 
 	    if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 
@@ -63,7 +61,7 @@ class ReportController extends Controller
 
 	    }
 
-	    $articles    = $report->articles()->where('report_id', $report->id )->get();
+	    $articles = $report->articles()->where('report_id', $report->id )->get();
 
         //dd($articles[0]);
         //dump($categories);
@@ -83,13 +81,11 @@ class ReportController extends Controller
                     $items[ false][$subcategory] [] = $article;
                 }
 	    }
-
 //        dd(Subcategory::where('title','Итоговая часть')->get());
 //        dump($items);
        // return 123;
-        return view('report.monthly_weekly_show', compact('report', 'items'));
+        return view('report.common_show', compact('report', 'items'));
     }
-
 
     public function item_article ( $slug,  ArticleReports $article ) {
 
@@ -291,26 +287,49 @@ class ReportController extends Controller
         }
 
     }
-    public function report_step_2 (  $slug, Report $report ) {
+
+    public function report_step_2 ($slug, Report $report) {
+
+
+        //dd($report);
 
     	if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
-
-		     $categories  = Category::where('report_type_id', $report->types->id)->get();
-
+		     $categories  = Category::where('report_type_id', $report->types->id);
+//            $categories_id = $categories->pluck('id')->toArray();
+            $categories = $categories->get();
 	    } else {
-
-		    $categories  = Category::where('report_id', $report->id)->get();
-
+		    $categories  = Category::where('report_id', $report->id);
+//            $categories_id = $categories->pluck('id')->toArray();
+            $categories = $categories->get();
 	    }
 
-        $articles    = $report->articles()->with('category')->get();
+        $articles = $report->articles()->where('report_id', $report->id )->get();
+
+      //  dd($categories);
+
         foreach ( $categories as $category ) {
+
             foreach ( $articles as $article ) {
-                if ( $article->category_id == $category->id ) {
-                    $items[ $category->title ][] = $article;
+                if($article->category_id)
+                    if ( $article->category_id == $category->id ) {
+                        $subcategory = $article->subcategory_id != false ?  $article->subcategory->title: false; // problem
+                        $items[$category->id] = [ $category->title ,[$article->subcategory_id =>[$subcategory=>[$article]]]]; //
+                       // $items[ $category->title][$subcategory] [] = $article;
+                       // $categories_arr[$category->id][] = $article->subcategory_id;
+                        //Subcategory::select('title')->where('id',$article->subcategory_id)->get()
+                    }
                 }
-            }
+            
         }
+        //dump($categories_arr);
+        dd($items);
+//        foreach ( $categories as $category ) {
+//            foreach ( $articles as $article ) {
+//                if ( $article->category_id == $category->id ) {
+//                    $items[ $category->title ][] = $article;
+//                }
+//            }
+//        }
 
         return view('report.add_form_step_2', compact('report', 'items', 'categories')
 

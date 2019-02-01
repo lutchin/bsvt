@@ -58,63 +58,6 @@ $y = date("Y");
             @endforeach
 
         @endif
-
-                {{--@if(!empty($report->categories))--}}
-                    {{--@foreach($report->categories as  $category)--}}
-                        {{--<div class="row out_list_title">--}}
-                            {{--<p class="title">--}}
-                            		{{--{{ $category->title }}--}}
-                                {{--<span>--}}
-                                    {{--<a target="_blank" href="/various/pdf_category/{{ $category->id }}" class="pdf"></a>--}}
-                                {{--</span>--}}
-                            {{--</p>--}}
-                            {{--@if(!empty($category->articles))--}}
-                                {{--@foreach($category->articles as  $catarticle)--}}
-                                    {{--<div class="row padl_sub2 out_list_title">--}}
-
-                                        {{--<a href="/various/article/{{ $catarticle->id }}">--}}
-                                            {{--<p class="pdf_box">--}}
-                                            	{{--<span>--}}
-                                            		{{--{{ $catarticle->title }}--}}
-                                            	{{--</span>--}}
-                                            	{{--<span>--}}
-                									{{--<a target="_blank" href="/various/pdf_article/{{ $catarticle->id }}" class="pdf"></a>--}}
-                								{{--</span>--}}
-                                            {{--</p>--}}
-                                        {{--</a>--}}
-                                    {{--</div>--}}
-                                {{--@endforeach--}}
-                            {{--@endif--}}
-                        {{--</div>--}}
-                        {{--@if(!empty($category->subcategories))--}}
-                            {{--@foreach($category->subcategories as  $subcategory)--}}
-                                    {{--<div class="row padl_sub1 out_list_title">--}}
-
-                                        {{--<p>--}}
-                                            {{--{{ $subcategory->title }}--}}
-                                            {{--<span>--}}
-                                            {{--<a target="_blank" href="/various/pdf_subcategory/{{ $subcategory->id }}" class="pdf"></a>--}}
-                                        {{--</span>--}}
-                                        {{--</p>--}}
-                                        {{--@if(!empty($subcategory->articles))--}}
-                                            {{--@foreach($subcategory->articles as  $article)--}}
-                                                {{--<div class="row padl_sub2 out_list_title">--}}
-													{{--<p class="pdf_box">--}}
-	                                                    {{--<a href="/various/article/{{ $article->id }}/{{ $variousreport->id }}">--}}
-	                                                        	{{--{{ $article->title }}				--}}
-	                                                    {{--</a>--}}
-	                                                    {{--<a target="_blank" href="/various/pdf_article/{{ $article->id }}" class="pdf"></a>--}}
-                                                    {{--</p>	--}}
-                                                {{--</div>--}}
-                                            {{--@endforeach--}}
-                                        {{--@endif--}}
-                                    {{--</div>--}}
-                            {{--@endforeach--}}
-                        {{--@endif--}}
-                    {{--@endforeach--}}
-                {{--@endif--}}
-            {{--@endforeach--}}
-            {{--@endif--}}
         </div>
             <div class="row box_save_article mt30">
 
