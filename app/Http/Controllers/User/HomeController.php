@@ -83,11 +83,11 @@ class HomeController extends Controller
 
 	    if($request->ajax()){
 
-		    foreach( $results as $article) {
-
-			   $article->titleTags($article->title);
-
-            }
+//		    foreach( $results as $article) {
+//
+//			   $article->titleTags($article->title);
+//
+//            }
 
 		    return   $results;
 
@@ -123,32 +123,31 @@ class HomeController extends Controller
         $report_type   = ReportType::where('slug', $request->input('report_type'))
                                    ->first() ? ReportType::where('slug', $request->input('report_type'))
                                                                                ->first() : $request->input('report_type');
-        $report_slug = ReportType::where('slug', $request->input('report_type'))
-                                 ->first() ? ReportType::where('slug', $request->input('report_type'))
+        $report_slug   = ReportType::where('slug', $request->input('report_type'))
+                                   ->first() ? ReportType::where('slug', $request->input('report_type'))
                                                                              ->first()->slug : $request->input('report_type');
         $new_weekly    = (int) $request->input('new_weekly');
         $new_monthly   = (int) $request->input('new_monthly');
         if ( $countries->count() == 0 and $companies->count() == 0 and $personalities->count() == 0 and $vvt_types->count() == 0 ) {
             //поиск без учета тегов
-
+				$article_reports =  ArticleReports::where([
+					['start_period', '>=', $start_period],
+					['end_period', '<=', $end_period],
+				])->active()->get(); dump($article_reports);
             switch ( $report_slug ) {
+
+
                 case 'all_reports':
                     $this->findinalltables($start_period, $end_period, $articles);
                     break;
                 case 'weekly':
                     if ( $new_weekly === 0 ) {
-                        foreach ( Weeklyarticle::where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
+                        foreach ( $article_reports as $item ) {
                             $articles[ 'weekly' ][ $item->id ] = $item;
                         }
                     }
                     else {
-                        foreach ( Weeklyarticle::where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
+                        foreach ( $article_reports as $item ) {
                             if ( $item->category->id == Category::find($new_weekly)->id ) {
                                 $articles[ 'weekly' ][ $item->id ] = $item;
                             }
@@ -158,18 +157,12 @@ class HomeController extends Controller
                     break;
                 case 'monthly':
                     if ( $new_monthly === 0 ) {
-                        foreach ( Monthlyarticle::where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
+                        foreach ( $article_reports as $item ) {
                             $articles[ 'monthly' ][ $item->id ] = $item;
                         }
                     }
                     else {
-                        foreach ( Monthlyarticle::where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
+                        foreach ( $article_reports as $item ) {
                             if ( $item->category->id == Category::find($new_monthly)->id ) {
                                 $articles[ 'monthly' ][ $item->id ] = $item;
                             }
@@ -178,36 +171,24 @@ class HomeController extends Controller
 
                     break;
                 case 'countrycatalog':
-                    foreach ( InfoCountry::where([
-                      ['start_date', '>=', $start_period],
-                      ['end_date', '<=', $end_period],
-                    ])->active()->get() as $item ) {
+                    foreach ( $article_reports as $item ) {
                         $articles[ 'countrycatalog' ][ $item->id ] = $item;
                     }
 
                     break;
                 case 'yearly':
-                    foreach ( Yearlyarticle::where([
-                      ['start_period', '>=', $start_period],
-                      ['end_period', '<=', $end_period],
-                    ])->active()->get() as $item ) {
+                    foreach ( $article_reports as $item ) {
                         $articles[ 'yearly' ][ $item->id ] = $item;
                     }
 
                     break;
                 case 'plannedexhibition':
-                    foreach ( Plannedexhibition::where([
-                      ['start', '>=', $start_period],
-                      ['fin', '<=', $end_period],
-                    ])->active()->get() as $item ) {
+                    foreach ( $article_reports as $item ) {
                         $articles[ 'plannedexhibition' ][ $item->id ] = $item;
                     }
                     break;
                 case 'various':
-                    foreach ( Variousarticle::where([
-                      ['start_period', '>=', $start_period],
-                      ['end_period', '<=', $end_period],
-                    ])->active()->get() as $item ) {
+                    foreach ( $article_reports as $item ) {
                         $articles[ 'various' ][ $item->id ] = $item;
                     }
                     break;
