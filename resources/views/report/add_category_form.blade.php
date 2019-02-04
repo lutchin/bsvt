@@ -54,7 +54,7 @@ switch ( $m ) {
 @section('content')
 
     <div class="container page_create_post">
-        
+        123
         <form id="form" action="/analyst/{{ $report->types->slug }}/addcategory" method="post" >
             <div class="row justify-content-center">
                 <h3>Добавление региона</h3>

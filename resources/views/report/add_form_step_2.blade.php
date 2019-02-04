@@ -1,53 +1,3 @@
-<?php
-
-function m_name($m) {
-	switch ( $m ) {
-	    case 1:
-	        $m_name = 'января';
-	        break;
-	    case 2:
-	        $m_name = 'февраля';
-	        break;
-	    case 3:
-	        $m_name = 'марта';
-	        break;
-	    case 4:
-	        $m_name = 'апреля';
-	        break;
-	    case 5:
-	        $m_name = 'мая';
-	        break;
-	    case 6:
-	        $m_name = 'июня';
-	        break;
-	    case 7:
-	        $m_name = 'июля';
-	        break;
-	    case 8:
-	        $m_name = 'августа';
-	        break;
-	    case 9:
-	        $m_name = 'сентября';
-	        break;
-	    case 10:
-	        $m_name = 'октября';
-	        break;
-	    case 11:
-	        $m_name = 'ноября';
-	        break;
-	    case 12:
-	        $m_name = 'декабря';
-	        break;
-	    default:
-	        $m      = "Ошибка даты";
-	        $m_name = "";
-	        break;
-	
-	}
-	return $m_name;
-}
-
-?>
 @extends('layouts.app')
 
 @section('content')
@@ -55,7 +5,7 @@ function m_name($m) {
 
         <h3 class="title">{{ $report->types->description }}
 			@if( $report->types->slug == 'weekly' || $report->types->slug == 'monthly' )
-			№ {{ $report->number }} за период от {{date("d",$report->date_start)}} {{m_name(date("m",$report->date_start))}} {{date("Y",$report->date_start)}} года по {{date("d",$report->date_end)}} {{m_name(date("m",$report->date_end))}} {{date("Y",$report->date_end)}} года
+			№ {{ $report->number }} за период от {{date("d",$report->date_start)}} {{Helper::getMonthText(date("m",$report->date_start))}} {{date("Y",$report->date_start)}} года по {{date("d",$report->date_end)}} {{Helper::getMonthText(date("m",$report->date_end))}} {{date("Y",$report->date_end)}} года
 			@else
 				за {{ date("Y",$report->date_start) }} год.
 			@endif
@@ -103,146 +53,95 @@ function m_name($m) {
 
 				</div>
 			@endif
-			@if($report->types->slug != 'plannedexhibition')
-				@if(!empty($report))
-
-						@if(!empty($report->articles))
-							@foreach($report->articles as  $article)
-								@if(!isset($article->category) && !isset($article->subcategory) && $article->report_id == $report->id )
-								<div class="row padl_sub2 out_list_title">
-
-									<a href="/report/{{ $report->types->slug }}/article/{{ $article->id }}">
-										<p>{{ $article->title }}</p>
-									</a>
-
-									<form onsubmit="deleteName(this,'{{ $article->title }}');return false;" action="/report/{{ $report->types->slug }}/delete_article/{{ $article->id }}" method="post">
-										{{ method_field('delete') }}
-										@csrf
-										<button  class="butt butt_def butt_min butt_add butt_small">Удалить материал</button>
-									</form>
-
-									<a href="/report/{{ $report->types->slug }}/upd/{{$article->id}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать материал</button></a>
-
-									@if($article->status == 0)
-										<p class="status st-line st-0">| Не утверждено</p>
-									@elseif($article->status == 1)
-										<p class="status st-line st-1">| Ожидает утверждения</p>
-									@elseif($article->status == 2)
-										<p class="status st-line st-2">| Утверждено</p>
-									@endif
-
-								</div>
-								@endif
-							@endforeach
-						@endif
-
-				@endif
-			@endif
 		@endif
+
 		@if( $report->types->slug != 'plannedexhibition' )
-        @foreach($categories as $category)
-            <div class="row">
-                <p class="title">{{ $category->title }}</p>
-				@if( $report->types->slug == 'countrycatalog' )
-				<form action="/report/{{ $report->types->slug }}/{{ $category->id }}/deleteregion" method="post">
-					{{ method_field('delete') }}
-					@csrf
-					<button class="butt butt_def butt_min butt_add butt_small">Удалить регион</button>
-				</form>
-
-				<a href="/report/{{ $report->types->slug }}/upd_category/{{ $category->id }}">
-					<button class="butt butt_def butt_min butt_add butt_small">Редактировать регион</button>
-				</a>
-				@endif
-				@if( count($category->subcategories) == 0 )
-				<a href="/report/{{ $report->types->slug }}/add3/{{$report->id}}/{{$category->id}}"><button class="butt butt_def butt_min butt_add butt_small">Добавить материал</button></a>
-				@endif
-				@if( $report->types->slug == 'yearly' )
-				<form onsubmit="deleteName(this,'{{ $category->title }}');return false;" action="/report/{{ $report->types->slug }}/{{ $category->id }}/deletecategory" method="post">
-					{{ method_field('delete') }}
-					@csrf
-					<button class="butt butt_def butt_min butt_add butt_small">Удалить раздел</button>
-				</form>
-
-				<button class="butt butt_def butt_min butt_add onclick_popup_subcat butt_small" date-cat-id="{{$category->id}}">Добавить подраздел</button>
-
-				<a href="/report/{{ $report->types->slug }}/upd_category/{{$category->id}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать раздел</button></a>
-				@endif
-            </div>
-			@if( $report->types->slug == 'countrycatalog')
-			<div class="row padl_sub2 out_list_title">
-				<div class="vpor_box">
-					<p class="vpor_title">Военно-политическая обстановка в регионе
-
-					</p>
-					<div class="vpor_desc" style="display:none;">
-						{!!$category->description !!}
-					</div>
-				</div>
-			</div>
-			@endif
-			@if( $report->types->slug == 'weekly' || $report->types->slug == 'monthly' || $report->types->slug == 'yearly' || $report->types->slug == 'countrycatalog')
-				@foreach( $report->types->categories as  $category )
-
-							@foreach($category->article_reports as $article)
-								@if(!isset($article->subcategory))
-									@if($article->report_id == $report->id && $article->category_id == $category->id)
-										<div class="row padl1 out_list_title">
-											<a href="/article/{{ $article->id }}"><p>{{ $article->title }}</p>
-											</a>
-
-											<form onsubmit="deleteName(this,'{{ $article->title }}');return false;" action="/report/{{ $report->types->slug }}/delete_article/{{$article->id}}" method="post">
-												{{ method_field('delete') }}
-												@csrf
-												<button  class="butt butt_def butt_min butt_add butt_small">Удалить материал</button>
-											</form>
 
 
-											<a href="/report/{{ $report->types->slug }}/upd/{{$article->id}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать материал</button></a>
 
-											@if($article->status == 0)
-												<p class="status st-line st-0">| Не утверждено</p>
-											@elseif($article->status == 1)
-												<p class="status st-line st-1">| Ожидает утверждения</p>
-											@elseif($article->status == 2)
-												<p class="status st-line st-2">| Утверждено</p>
-											@endif
-										</div>
-									@endif
-								@endif
-							@endforeach
+        @foreach($items as $cat=>$subcats)
+				<div class="row">
 
-							@endforeach
-
+					@if($categories->where('id',$cat)->first())
+					<p class="title">{{ $categories->where('id',$cat)->first()->title}}</p>
 					@endif
-					@if(!empty($category->subcategories))
-						@foreach($category->subcategories as  $subcategory)
-							<div class="row padl_sub1 out_list_title">
+					@if( $report->types->slug == 'countrycatalog' )
+						<form action="/report/{{ $report->types->slug }}/{{ $cat}}/deleteregion" method="post">
+							{{ method_field('delete') }}
+							@csrf
+							<button class="butt butt_def butt_min butt_add butt_small">Удалить регион</button>
+						</form>
 
-								<p class="title">{{ $subcategory->title }}</p>
-								@if( $report->types->slug != 'monthly' )
-								<form onsubmit="deleteName(this,'{{ $subcategory->title }}');return false;" action="/report/{{ $report->types->slug }}/deletesubcategory/{{ $subcategory->id }}" method="post">
+						<a href="/report/{{ $report->types->slug }}/upd_category/{{$cat }}">
+							<button class="butt butt_def butt_min butt_add butt_small">Редактировать регион</button>
+						</a>
+					@endif
+
+					@if( empty($subcategories[$cat]) && $report->types->slug != 'various' && $cat)
+						<a href="/report/{{ $report->types->slug }}/add3/{{$report->id}}/{{$cat}}"><button class="butt butt_def butt_min butt_add butt_small">Добавить материал</button></a>
+					@endif
+
+					@if( $report->types->slug == 'yearly' && $categories->where('id',$cat)->first())
+						<form onsubmit="deleteName(this,'{{ $categories->where('id',$cat)->first()->title}}');return false;" action="/report/{{ $report->types->slug }}/{{ $cat }}/deletecategory" method="post">
+							{{ method_field('delete') }}
+							@csrf
+							<button class="butt butt_def butt_min butt_add butt_small">Удалить раздел</button>
+						</form>
+
+						<button class="butt butt_def butt_min butt_add onclick_popup_subcat butt_small" date-cat-id="{{$cat}}">Добавить подраздел</button>
+
+						<a href="/report/{{ $report->types->slug }}/upd_category/{{$cat}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать раздел</button></a>
+					@endif
+
+					</div>
+
+					@if( $report->types->slug == 'countrycatalog')
+						<div class="row padl_sub2 out_list_title">
+							<div class="vpor_box">
+								<p class="vpor_title">Военно-политическая обстановка в регионе
+
+								</p>
+								<div class="vpor_desc" style="display:none;">
+									{!!$categories->where('id',$cat)->first()->description !!}
+								</div>
+							</div>
+						</div>
+					@endif
+
+					@foreach($subcats as $subcat => $articles)
+						<div class="row padl_sub1 out_list_title">
+							@if(!empty($subcategories[$cat][$subcat]))
+							<p class="title">{{ $subcategories[$cat][$subcat] }}</p>
+							@endif
+							@if( $report->types->slug == 'yearly' )
+								<form onsubmit="deleteName(this,'@if(!empty($subcategories[$cat][$subcat])){{ $subcategories[$cat][$subcat] }}@endif');
+										return false;" action="/report/{{ $report->types->slug }}/deletesubcategory/{{ $subcat }}" method="post">
 									{{ method_field('delete') }}
 									@csrf
+									@if(!empty($subcategories[$cat][$subcat]))
 									<button  class="butt butt_def butt_min butt_add butt_small">Удалить подраздел</button>
+									@endif
 								</form>
+							@endif
+
+								@if(!empty($subcategories[$cat][$subcat]))
+							<a href="/report/{{ $report->types->slug }}/add3/{{$report->id}}/{{$cat}}/{{ $subcat }}">
+								<button class="butt butt_def butt_min butt_add butt_small">Добавить материал</button>
+							</a>
 								@endif
-								<a href="/report/{{ $report->types->slug }}/add3/{{$report->id}}/{{$category->id}}/{{ $subcategory->id }}">
-									<button class="butt butt_def butt_min butt_add butt_small">Добавить материал</button>
-								</a>
-								@if( $report->types->slug != 'monthly' )
-								<a href="/report/{{ $report->types->slug }}/upd_subcategory/{{$subcategory->id}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать подраздел</button></a>
-								@endif
-									@if(!empty($subcategory->article_reports))
-									@foreach($subcategory->article_reports as  $article)
-										@if($article->subcategory && $article->report_id == $report->id)
+
+							@if( $report->types->slug == 'yearly' && !empty($subcategories[$cat][$subcat]))
+								<a href="/report/{{ $report->types->slug }}/upd_subcategory/{{$subcat}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать подраздел</button></a>
+							@endif
+
+								@foreach($articles as  $article)
 										<div class="row padl_sub2 out_list_title">
 
 											<a href="/report/{{ $report->types->slug }}/article/{{ $article->id }}">
 												<p>{{ $article->title }}</p>
 											</a>
 
-											<form onsubmit="deleteName(this,'{{ $article->title }}');return false;" action="/report/{{ $report->types->slug }}/{{ $article->id }}/deletearticle" method="post">
+											<form onsubmit="deleteName(this,' {{ $article->title }}');return false;" action="/report/{{ $report->types->slug }}/{{ $article->id }}/deletearticle" method="post">
 												{{ method_field('delete') }}
 												@csrf
 												<button  class="butt butt_def butt_min butt_add butt_small">Удалить материал</button>
@@ -259,13 +158,15 @@ function m_name($m) {
 											@endif
 
 										</div>
-										@endif
-									@endforeach
-								@endif
-							</div>
-						@endforeach
-					@endif
-				@endforeach
+								@endforeach
+						</div>
+					@endforeach
+
+		@endforeach
+
+
+
+
 		   @elseif ( $report->types->slug == 'plannedexhibition' )
 				<div class="col-md-12 out_table analyst_report">
 					<table style="border: 1px solid">
@@ -420,6 +321,7 @@ function m_name($m) {
 		</form>
 
 	</div>
+
 @endsection
 @section('scripts')
 	<script type="text/javascript" charset="utf-8">

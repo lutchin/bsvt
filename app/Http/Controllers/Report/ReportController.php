@@ -1,5 +1,4 @@
 <?php
- 
 namespace App\Http\Controllers\Report;
 
 use App\ArticleReports;
@@ -45,7 +44,7 @@ class ReportController extends Controller
 
     }
 
-    public function report_show ( $slug , Report $report ) {
+    public function report_show ( $slug , Report $report ,Request $request) {
 
         if($report->types->slug!=$slug) {
            return redirect('/')->with('status', 'Отчет не найден');
@@ -61,30 +60,43 @@ class ReportController extends Controller
 
 	    }
 
-	    $articles = $report->articles()->where('report_id', $report->id )->get();
-
         //dd($articles[0]);
         //dump($categories);
-
-//
-		    foreach ( $articles as $article ) {
+        $page = null;
+        if($slug != 'plannedexhibition') {
+            $articles = $report->articles()->where('report_id', $report->id )->get();
+            foreach ( $articles as $article ) {
                 if($article->category_id)
-                foreach ( $categories as $category ) {
-			    if ( $article->category_id == $category->id ) {
-				    $subcategory = $article->subcategory_id != false ?  $article->subcategory->title: false; // problem
-                    $items[ $category->title ][$subcategory] [] = $article;
-                    //Subcategory::select('title')->where('id',$article->subcategory_id)->get()
-			    }
-		    }
+                    foreach ( $categories as $category ) {
+                        if ( $article->category_id == $category->id ) {
+                            $subcategory = $article->subcategory_id != false ?  $article->subcategory->title: false; // problem
+                            $items[ $category->title ][$subcategory] [] = $article;
+                            //Subcategory::select('title')->where('id',$article->subcategory_id)->get()
+                        }
+                    }
                 else {
                     $subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
                     $items[ false][$subcategory] [] = $article;
                 }
-	    }
+            }
+            $template = 'report.common_show';
+        }
+		    else {
+
+                $items = $report->articles()->where('report_id', $report->id )->paginate(10);
+                $template = 'report.plannedexhibition.item';
+                $page = $request->page;
+            }
+          //  dd($items);
+
 //        dd(Subcategory::where('title','Итоговая часть')->get());
 //        dump($items);
        // return 123;
-        return view('report.common_show', compact('report', 'items'));
+
+//        dd($items);
+
+
+        return view($template, compact('report', 'items','page'));
     }
 
     public function item_article ( $slug,  ArticleReports $article ) {
@@ -196,6 +208,7 @@ class ReportController extends Controller
 
 		return view('report.upd_form_category', [
 			'category'         => $category,
+            'slug'=>$slug
 		]);
 	}
 
@@ -289,10 +302,7 @@ class ReportController extends Controller
     }
 
     public function report_step_2 ($slug, Report $report) {
-
-
-        //dd($report);
-
+        
     	if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 		     $categories  = Category::where('report_type_id', $report->types->id);
 //            $categories_id = $categories->pluck('id')->toArray();
@@ -304,34 +314,32 @@ class ReportController extends Controller
 	    }
 
         $articles = $report->articles()->where('report_id', $report->id )->get();
+        $subcategories = [];
 
-      //  dd($categories);
 
-        foreach ( $categories as $category ) {
 
-            foreach ( $articles as $article ) {
-                if($article->category_id)
-                    if ( $article->category_id == $category->id ) {
-                        $subcategory = $article->subcategory_id != false ?  $article->subcategory->title: false; // problem
-                        $items[$category->id] = [ $category->title ,[$article->subcategory_id =>[$subcategory=>[$article]]]]; //
-                       // $items[ $category->title][$subcategory] [] = $article;
-                       // $categories_arr[$category->id][] = $article->subcategory_id;
-                        //Subcategory::select('title')->where('id',$article->subcategory_id)->get()
+        foreach ( $articles as $article ) {
+            if ($article->category_id) {
+                foreach ($categories as $category) {
+                    if ($article->category_id == $category->id) {
+                        $subcategory = $article->subcategory_id != false ? $article->subcategory_id : false; // problem
+                        $items[$article->category_id][$subcategory][] = $article;
+                        if ($subcategory) {
+                            $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
+                        }
                     }
                 }
-            
-        }
-        //dump($categories_arr);
-        dd($items);
-//        foreach ( $categories as $category ) {
-//            foreach ( $articles as $article ) {
-//                if ( $article->category_id == $category->id ) {
-//                    $items[ $category->title ][] = $article;
-//                }
-//            }
-//        }
+            }
+                else {
+                    $subcategory = $article->subcategory_id != false ?  $article->subcategory_id: false; // problem
+                    $items[false][$subcategory][] = $article;
+                    if($subcategory) {
+                        $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
+                    }
+                }
+            }
 
-        return view('report.add_form_step_2', compact('report', 'items', 'categories')
+        return view('report.add_form_step_2', compact('report', 'items', 'categories','subcategories')
 
         );
     }
@@ -482,9 +490,7 @@ class ReportController extends Controller
 
 
     }
-
-
-
+    
     public function upd_form ( $slug, ArticleReports $article ) {
     	$vvt_types_array = VvtType::find($article->companies->pluck('id'));
 	    $vvt_types = [];
@@ -668,8 +674,7 @@ class ReportController extends Controller
 			'category'         => $subcategory,
 		]);
 	}
-
-
+    
 	public function update_subcategory ( $slug, Request $request, Subcategory $subcategory ) { //++
 
 		$title = $request->input('title');
@@ -690,7 +695,6 @@ class ReportController extends Controller
 		return Auth::user()->roles[0]->title;
 
 	}
-
 
 	public function reports(){
 

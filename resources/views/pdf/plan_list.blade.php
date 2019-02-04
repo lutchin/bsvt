@@ -1,55 +1,3 @@
-<?php
-
-function m_name ( $m ) {
-	switch ( $m ) {
-		case 1:
-			$m_name = 'января';
-			break;
-		case 2:
-			$m_name = 'февраля';
-			break;
-		case 3:
-			$m_name = 'марта';
-			break;
-		case 4:
-			$m_name = 'апреля';
-			break;
-		case 5:
-			$m_name = 'мая';
-			break;
-		case 6:
-			$m_name = 'июня';
-			break;
-		case 7:
-			$m_name = 'июля';
-			break;
-		case 8:
-			$m_name = 'августа';
-			break;
-		case 9:
-			$m_name = 'сентября';
-			break;
-		case 10:
-			$m_name = 'октября';
-			break;
-		case 11:
-			$m_name = 'ноября';
-			break;
-		case 12:
-			$m_name = 'декабря';
-			break;
-		default:
-			$m      = "Ошибка даты";
-			$m_name = "";
-			break;
-
-	}
-
-	return $m_name;
-}
-
-?>
-
 @extends('layouts.pdf')
 
 @section('content')
@@ -109,12 +57,10 @@ function m_name ( $m ) {
 		.center {
 			text-align: center;
 		}
-
-
 	</style>
 
 	<!-- <h4>Приложение</h4> -->
-	<p style="width: 64%; margin-bottom: 10px; caption-side: left; text-align: justify; text-indent: 0"><strong>Основные международные выставки оборонной промышленности, вооружений и военной техники, продукции военного назначения, планируемые к проведению в {{ date("Y",$article->start_date) }} году</strong></p>
+	<p style="width: 64%; margin-bottom: 10px; caption-side: left; text-align: justify; text-indent: 0"><strong>Основные международные выставки оборонной промышленности, вооружений и военной техники, продукции военного назначения, планируемые к проведению в {{ date("Y",$report->date_start) }} году</strong></p>
 	<table>
 
 		<thead>
@@ -127,7 +73,7 @@ function m_name ( $m ) {
 		</tr>
 		</thead>
 		<tbody>
-		@foreach($report as $item)
+		@foreach($items as $item)
 		<tr>
 			<td>{{ ++$loop->index }}.</td>
 			<td>  
@@ -135,13 +81,13 @@ function m_name ( $m ) {
 				<?php echo strip_tags($item['title'], "<p><a>");?>
 			</td>
 			<td class="center">
-				{{ date("d",$item['start']) }} - {{ date("d",$item['fin']) }} </br> {{ m_name(date("m",$item['fin'])) }}
+				{{ date("d",$item['date_start']) }} - {{ date("d",$item['date_end']) }} </br> {{ Helper::getMonthText(date("m",$item['date_end'])) }}
 			</td>
 			<td>
         		<?php echo strip_tags($item['place'], "<p><a>");?>
 			</td>
 			<td>
-        		<?php echo strip_tags($item['theme'], "<p><a>");?>
+        		<?php echo strip_tags($item['description'], "<p><a>");?>
 			</td>
 		</tr>
 		@endforeach

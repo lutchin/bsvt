@@ -178,33 +178,42 @@ class PdfController extends Controller {
 		}
 
 
-		$articles    = $report->articles()->with('category')->get();
 
-		foreach ( $articles as $article ) {
-			if($article->category_id)
-				foreach ( $categories as $category ) {
-					if ( $article->category_id == $category->id ) {
-						$subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
-						$items[ $category->title ][$subcategory] [] = $article;
+		if($report_slug != 'plannedexhibition') {
+			$articles    = $report->articles()->with('category')->get();
+			foreach ($articles as $article) {
+				if ($article->category_id)
+					foreach ($categories as $category) {
+						if ($article->category_id == $category->id) {
+							$subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
+							$items[$category->title][$subcategory] [] = $article;
 
+						}
 					}
+				else {
+					$subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
+					$items[false][$subcategory] [] = $article;
 				}
-			else {
-				$subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
-				$items[ false][$subcategory] [] = $article;
 			}
-		}
 
-		foreach ( $categories as $category ) {
-			$descriptions[] = $category->description;
-		}
+			foreach ($categories as $category) {
+				$descriptions[] = $category->description;
+			}
 
 //		dd($descriptions);
 //		dd($items);
 
-		$template = 'pdf.pdf_item';
+			$template = 'pdf.pdf_item';
+			$pdf = \PDF::loadView($template, compact('report', 'items','report_slug','descriptions'), [], $format);
+		}
+		else {
+			$template = 'pdf.plan_list';
+			$items = $report->articles()->with('category')->get();
+			$pdf = \PDF::loadView($template, compact('report','items','report_slug'), [], $format);
+		}
 
-		$pdf = \PDF::loadView($template, compact('report', 'items','report_slug','descriptions'), [], $format);
+
+
 		return $pdf->stream( $this->setTitle( $report ) .'.pdf' );
 
 	}
