@@ -28,6 +28,8 @@ use App\Mail\SendEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 
+use App\Report;
+
 class HomeController extends Controller
 {
 
@@ -46,15 +48,21 @@ class HomeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index () {
-        $week_articles           = Weeklyreport::latest('start_date')->active()->take(3)->get();
-        $month_articles          = Monthlyreport::latest('start_date')->active()->take(3)->get();
-        $year_articles           = Yearlyreport::latest('start_date')->active()->take(3)->get();
-        $various_articles        = Variousreport::latest('start_date')->active()->take(3)->get();
-        $countrycatalogs         = Countrycatalog::latest('start_date')->active()->take(3)->get();
-        $plannedexhibitionsyears = Plannedexhibitionyear::latest('start_date')->active()->take(3)->get();
 
+        $report_types = ReportType::all()->except(6);
 
-        return view('user.home', compact('title', 'week_articles', 'month_articles', 'year_articles', 'various_articles', 'countrycatalogs', 'plannedexhibitionsyears'));
+        $total_array = [];
+        $i=$k=0;
+        foreach ($report_types as $report_type) {
+            $total_array[$k][] = [$report_type->description,$report_type->slug,Report::latest('date_start')->where('type_id',$report_type->id)->active()->take(3)->get()];
+            $i++;
+            if($i==2) {
+                $i=0;
+                $k++;
+            }
+        }
+        
+        return view('user.home', compact('title', 'week_articles', 'month_articles', 'year_articles', 'various_articles', 'countrycatalogs', 'plannedexhibitionsyears','total_array'));
     }
 
     public function cabinet ( User $user ) {
