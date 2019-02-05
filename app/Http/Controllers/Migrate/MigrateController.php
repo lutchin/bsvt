@@ -895,7 +895,7 @@ class MigrateController extends Controller
 			$report_new->date_start = $report->start_date;
 			$report_new->date_end   = $report->end_date;
 			$report_new->status     = $report->published;
-			$report_new->number     = $report->number;
+			$report_new->title     = $report->number;
 			$report_new->created_at = $report->created_at;
 			$report_new->updated_at = $report->updated_at;
 			$report_new->save();

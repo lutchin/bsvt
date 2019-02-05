@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Category;
+use App\Report;
 use App\ArticleReports;
 use App\Http\Controllers\Controller;
 use App\models\analyst\exhibitions\Plannedexhibition;
@@ -27,6 +28,9 @@ use Illuminate\Http\Request;
 use App\Mail\SendEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HomeController extends Controller
 {
@@ -66,7 +70,7 @@ class HomeController extends Controller
 
     public function search ( Request $request, $quote = null ) {
 
-        $result = [];
+	    $size = 15;
 
 	    if($request->ajax()){
 
@@ -78,9 +82,9 @@ class HomeController extends Controller
 
 	    }
 
-		$results = ArticleReports::search($q)->active()->paginate(40);
+		//$results = ArticleReports::search($q)->active()->paginate(40);
 
-
+	    $results = ArticleReports::search($q, $size);
 	    if($request->ajax()){
 
 //		    foreach( $results as $article) {
@@ -125,448 +129,196 @@ class HomeController extends Controller
                                                                                ->first() : $request->input('report_type');
         $report_slug   = ReportType::where('slug', $request->input('report_type'))
                                    ->first() ? ReportType::where('slug', $request->input('report_type'))
-                                                                             ->first()->slug : $request->input('report_type');
+                                                                             ->first()->id : $request->input('report_type');
         $new_weekly    = (int) $request->input('new_weekly');
         $new_monthly   = (int) $request->input('new_monthly');
+
+        if ( $new_weekly !== 0) {
+
+	        $category = $new_weekly;
+
+        } elseif( $new_monthly !== 0 ) {
+
+	        $category = $new_monthly;
+
+        } else {
+
+	        $category = 0;
+
+        }
+
         if ( $countries->count() == 0 and $companies->count() == 0 and $personalities->count() == 0 and $vvt_types->count() == 0 ) {
             //поиск без учета тегов
-				$article_reports =  ArticleReports::where([
-					['start_period', '>=', $start_period],
-					['end_period', '<=', $end_period],
-				])->active()->get(); dump($article_reports);
-            switch ( $report_slug ) {
 
+			if ( $report_slug == 'all_reports' ){
+				$articles =  ArticleReports::where([
+					['date_start', '>=', $start_period],
+					['date_end', '<=', $end_period],
+				])->active()->paginate(40);
+				$articles->appends($request->all());
+			} else {
 
-                case 'all_reports':
-                    $this->findinalltables($start_period, $end_period, $articles);
-                    break;
-                case 'weekly':
-                    if ( $new_weekly === 0 ) {
-                        foreach ( $article_reports as $item ) {
-                            $articles[ 'weekly' ][ $item->id ] = $item;
-                        }
-                    }
-                    else {
-                        foreach ( $article_reports as $item ) {
-                            if ( $item->category->id == Category::find($new_weekly)->id ) {
-                                $articles[ 'weekly' ][ $item->id ] = $item;
-                            }
-                        }
-                    }
+				$reports = Report::where([
+					['type_id' , $report_slug],
+					['date_start', '>=', $start_period],
+					['date_end', '<=', $end_period],
+				])->pluck('id')->toArray();
 
-                    break;
-                case 'monthly':
-                    if ( $new_monthly === 0 ) {
-                        foreach ( $article_reports as $item ) {
-                            $articles[ 'monthly' ][ $item->id ] = $item;
-                        }
-                    }
-                    else {
-                        foreach ( $article_reports as $item ) {
-                            if ( $item->category->id == Category::find($new_monthly)->id ) {
-                                $articles[ 'monthly' ][ $item->id ] = $item;
-                            }
-                        }
-                    }
+				if ( $category === 0 ) {
 
-                    break;
-                case 'countrycatalog':
-                    foreach ( $article_reports as $item ) {
-                        $articles[ 'countrycatalog' ][ $item->id ] = $item;
-                    }
+					$articles = ArticleReports::whereIn( 'report_id', $reports )->active()->paginate(40);
+					$articles->appends($request->all());
 
-                    break;
-                case 'yearly':
-                    foreach ( $article_reports as $item ) {
-                        $articles[ 'yearly' ][ $item->id ] = $item;
-                    }
+				} else {
 
-                    break;
-                case 'plannedexhibition':
-                    foreach ( $article_reports as $item ) {
-                        $articles[ 'plannedexhibition' ][ $item->id ] = $item;
-                    }
-                    break;
-                case 'various':
-                    foreach ( $article_reports as $item ) {
-                        $articles[ 'various' ][ $item->id ] = $item;
-                    }
-                    break;
-            }
+					$articles = ArticleReports::whereIn(
+						'report_id', $reports )->where( 'category_id', $category )->active()->paginate(40);
+					$articles->appends($request->all());
+
+				}
+
+			}
+
         }
         else {
             //поиск с учетом тегов
             //Получаем количество отмеченных тегов
             $tags_count = $countries->count() + $companies->count() + $vvt_types->count() + $personalities->count();
 
-            switch ( $report_slug ) {
-                case 'all_reports':
-                    //поиск по всем таблицам
-                    $this->findbytagsinalltables($countries, $companies, $vvt_types, $personalities, $start_period, $end_period, $articles);
-                    break;
-                case 'weekly':
-                    if ( $new_weekly === 0 ) {
-                        foreach ( $countries as $country ) {
-                            foreach ( $country->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'weekly' ][] = $item;
-                            }
-                        }
-                        foreach ( $companies as $company ) {
-                            foreach ( $company->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'weekly' ][] = $item;
-                            }
-                        }
-                        foreach ( $vvt_types as $vvt_type ) {
-                            foreach ( $vvt_type->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'weekly' ][] = $item;
-                            }
-                        }
-                        foreach ( $personalities as $personality ) {
-                            foreach ( $personality->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'weekly' ][] = $item;
-                            }
-                        }
-                    }
-                    else {
-                        foreach ( $countries as $country ) {
-                            foreach ( $country->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_weekly)->id ) {
-                                    $articles[ 'weekly' ][] = $item;
-                                }
-                            }
-                        }
-                        foreach ( $companies as $company ) {
-                            foreach ( $company->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_weekly)->id ) {
-                                    $articles[ 'weekly' ][] = $item;
-                                }
-                            }
-                        }
-                        foreach ( $vvt_types as $vvt_type ) {
-                            foreach ( $vvt_type->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_weekly)->id ) {
-                                    $articles[ 'weekly' ][] = $item;
-                                }
-                            }
-                        }
-                        foreach ( $personalities as $personality ) {
-                            foreach ( $personality->weeklyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_weekly)->id ) {
-                                    $articles[ 'weekly' ][] = $item;
-                                }
-                            }
-                        }
-                    }
-                    //отбираем недельные статьи которые вытянулсь на каждый тег
-                    if ( isset($articles[ 'weekly' ]) ) {
-                        //группируем все стаьи
-                        foreach ( collect($articles[ 'weekly' ])->groupBy('id') as $value ) {
-                            //если одна запись вытянулась на каждый тег
-                            if ( $value->count() == $tags_count ) {
-                                //добавляем ее в массив, передаваемый во вьюху
-                                $strong[ 'weekly' ][] = $value->first();
-                            }
-                        };
-                    }
-                    $articles = isset($strong) ? $strong : collect([]);
-                    break;
-                case 'monthly':
-                    if ( $new_monthly === 0 ) {
-                        foreach ( $countries as $country ) {
-                            foreach ( $country->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'monthly' ][] = $item;
-                            }
-                        }
-                        foreach ( $companies as $company ) {
-                            foreach ( $company->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'monthly' ][] = $item;
-                            }
-                        }
-                        foreach ( $vvt_types as $vvt_type ) {
-                            foreach ( $vvt_type->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'monthly' ][] = $item;
-                            }
-                        }
-                        foreach ( $personalities as $personality ) {
-                            foreach ( $personality->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                $articles[ 'monthly' ][] = $item;
-                            }
-                        }
-                    }
-                    else {
-                        foreach ( $countries as $country ) {
-                            foreach ( $country->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_monthly)->id ) {
-                                    $articles[ 'monthly' ][] = $item;
-                                }
-                            }
-                        }
-                        foreach ( $companies as $company ) {
-                            foreach ( $company->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_monthly)->id ) {
-                                    $articles[ 'monthly' ][] = $item;
-                                }
-                            }
-                        }
-                        foreach ( $vvt_types as $vvt_type ) {
-                            foreach ( $vvt_type->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_monthly)->id ) {
-                                    $articles[ 'monthly' ][] = $item;
-                                }
-                            }
-                        }
-                        foreach ( $personalities as $personality ) {
-                            foreach ( $personality->monthlyarticles()->where([
-                              ['start_period', '>=', $start_period],
-                              ['end_period', '<=', $end_period],
-                            ])->active()->get() as $item ) {
-                                if ( $item->category->id == Category::find($new_monthly)->id ) {
-                                    $articles[ 'monthly' ][] = $item;
-                                }
-                            }
-                        }
-                    }
-                    //отбираем недельные статьи которые вытянулсь на каждый тег
-                    if ( isset($articles[ 'monthly' ]) ) {
-                        //группируем все стаьи
-                        foreach ( collect($articles[ 'monthly' ])->groupBy('id') as $value ) {
-                            //если одна запись вытянулась на каждый тег
-                            if ( $value->count() == $tags_count ) {
-                                //добавляем ее в массив, передаваемый во вьюху
-                                $strong[ 'monthly' ][] = $value->first();
-                            }
-                        };
-                    }
-                    $articles = isset($strong) ? $strong : collect([]);
-                    break;
-                case 'countrycatalog':
-                    foreach ( $countries as $country ) {
-                        foreach ( $country->countrycatalogarticles()->where([
-                          ['start_date', '>=', $start_period],
-                          ['end_date', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'countrycatalog' ][] = $item;
-                        }
-                    }
-                    foreach ( $companies as $company ) {
-                        foreach ( $company->countrycatalogarticles()->where([
-                          ['start_date', '>=', $start_period],
-                          ['end_date', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'countrycatalog' ][] = $item;
-                        }
-                    }
-                    foreach ( $vvt_types as $vvt_type ) {
-                        foreach ( $vvt_type->countrycatalogarticles()->where([
-                          ['start_date', '>=', $start_period],
-                          ['end_date', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'countrycatalog' ][] = $item;
-                        }
-                    }
-                    foreach ( $personalities as $personality ) {
-                        foreach ( $personality->countrycatalogarticles()->where([
-                          ['start_date', '>=', $start_period],
-                          ['end_date', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'countrycatalog' ][] = $item;
-                        }
-                    }
-                    //отбираем  статьи справочника государств которые вытянулсь на каждый тег
-                    if ( isset($articles[ 'countrycatalog' ]) ) {
-                        foreach ( collect($articles[ 'countrycatalog' ])->groupBy('id') as $value ) {
-                            if ( $value->count() == $tags_count ) {
-                                $strong[ 'countrycatalog' ][] = $value->first();
-                            }
-                        };
-                    }
-                    $articles = isset($strong) ? $strong : collect([]);
-                    break;
-                case 'yearly':
-                    foreach ( $countries as $country ) {
-                        foreach ( $country->yearlyarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'yearly' ][] = $item;
-                        }
-                    }
-                    foreach ( $companies as $company ) {
-                        foreach ( $company->yearlyarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'yearly' ][] = $item;
-                        }
+	        if ( $report_slug == 'all_reports' ) {
+		        //поиск по всем таблицам
+		        $this->findbytagsinalltables( $countries, $companies, $vvt_types, $personalities, $start_period, $end_period, $articles );
+		        $strong = collect();
+		        if ( isset( $articles ) ) {
+			        //группируем все стаьи
+			        foreach ( $articles->groupBy( 'id' ) as $value ) {
+				        //если одна запись вытянулась на каждый тег
+				        if ( $value->count() == $tags_count ) {
+					        //добавляем ее в массив, передаваемый во вьюху
+					        $strong = $strong->concat($value);
+				        }
+			        };
+		        }
 
-                    }
-                    foreach ( $vvt_types as $vvt_type ) {
-                        foreach ( $vvt_type->yearlyarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'yearly' ][] = $item;
-                        }
-                    }
-                    foreach ( $personalities as $personality ) {
-                        foreach ( $personality->yearlyarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'yearly' ][] = $item;
-                        }
-                    }
-                    //отбираем ежегодных статей которые вытянулсь на каждый тег
-                    if ( isset($articles[ 'yearly' ]) ) {
+		        $articles = isset( $strong ) ? $strong : collect( [] );
+		        $articles = $this->paginate($articles);
+		        $articles->appends($request->all())->setPath('search');
 
-                        foreach ( collect($articles[ 'yearly' ])->groupBy('id') as $value ) {
-                            if ( $value->count() == $tags_count ) {
-                                $strong[ 'yearly' ][] = $value->first();
-                            }
-                        };
-                    }
-                    $articles = isset($strong) ? $strong : collect([]);
-                    break;
-                case 'plannedexhibition':
-                    foreach ( $countries as $country ) {
-                        foreach ( $country->plannedexhibitionarticles()->where([
-                          ['start', '>=', $start_period],
-                          ['fin', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'plannedexhibition' ][] = $item;
-                        }
-                    }
-                    foreach ( $companies as $company ) {
-                        foreach ( $company->plannedexhibitionarticles()->where([
-                          ['start', '>=', $start_period],
-                          ['fin', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'plannedexhibition' ][] = $item;
-                        }
-                    }
-                    foreach ( $vvt_types as $vvt_type ) {
-                        foreach ( $vvt_type->plannedexhibitionarticles()->where([
-                          ['start', '>=', $start_period],
-                          ['fin', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'plannedexhibition' ][] = $item;
-                        }
-                    }
-                    foreach ( $personalities as $personality ) {
-                        foreach ( $personality->plannedexhibitionarticles()->where([
-                          ['start', '>=', $start_period],
-                          ['fin', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'plannedexhibition' ][] = $item;
-                        }
-                    }
-                    //отбираем  статьи о запланированных выставках которые вытянулсь на каждый тег
-                    if ( isset($articles[ 'plannedexhibition' ]) ) {
+	        } else {
+		        $strong = collect();
+				$articles = collect();
+		        $reports = Report::where([
+			        ['type_id' , $report_slug],
+			        ['date_start', '>=', $start_period],
+			        ['date_end', '<=', $end_period],
+		        ])->pluck('id')->toArray();
 
-                        foreach ( collect($articles[ 'plannedexhibition' ])->groupBy('id') as $value ) {
-                            if ( $value->count() == $tags_count ) {
-                                $strong[ 'plannedexhibition' ][] = $value->first();
-                            }
-                        };
-                    }
-                    $articles = isset($strong) ? $strong : collect([]);
-                    break;
-                case 'various':
-                    foreach ( $countries as $country ) {
-                        foreach ( $country->variousarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'various' ][] = $item;
-                        }
-                    }
-                    foreach ( $companies as $company ) {
+		        if ( $category === 0 ) {
 
-                        foreach ( $company->variousarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'various' ][] = $item;
-                        }
+			        foreach ( $countries as $country ) {
 
-                    }
-                    foreach ( $vvt_types as $vvt_type ) {
+				        $articles = $articles->concat($country->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+			        }
+			        foreach ( $companies as $company ) {
 
-                        foreach ( $vvt_type->variousarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'various' ][] = $item;
-                        }
+				        $articles = $articles->concat($company->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+			        }
+			        foreach ( $vvt_types as $vvt_type ) {
 
-                    }
-                    foreach ( $personalities as $personality ) {
-                        foreach ( $personality->variousarticles()->where([
-                          ['start_period', '>=', $start_period],
-                          ['end_period', '<=', $end_period],
-                        ])->active()->get() as $item ) {
-                            $articles[ 'various' ][] = $item;
-                        }
-                    }
-                    //отбираем  статей иных материалов которые вытянулсь на каждый тег
-                    if ( isset($articles[ 'various' ]) ) {
+				        $articles = $articles->concat($vvt_type->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
 
-                        foreach ( collect($articles[ 'various' ])->groupBy('id') as $value ) {
-                            if ( $value->count() == $tags_count ) {
-                                $strong[ 'various' ][] = $value->first();
-                            }
-                        };
-                    }
-                    $articles = isset($strong) ? $strong : collect([]);
-                    break;
-            }
+			        }
+			        foreach ( $personalities as $personality ) {
 
+				        $articles = $articles->concat($personality->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+
+			        }
+
+			        if ( isset( $articles ) ) {
+				        //группируем все стаьи
+				        foreach ( $articles->groupBy( 'id' ) as $value ) {
+					        //если одна запись вытянулась на каждый тег
+					        if ( $value->count() == $tags_count ) {
+						        //добавляем ее в массив, передаваемый во вьюху
+						        $strong = $strong->concat($value);
+					        }
+				        };
+			        }
+
+			        $articles = isset( $strong ) ? $strong : collect( [] );
+			        $articles = $this->paginate($articles);
+			        $articles->appends($request->all())->setPath('search');
+		        } else {
+			        foreach ( $countries as $country ) {
+
+				        $articles = $articles->concat($country->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+			                    [ 'category_id', $category ]
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+
+				        }
+			        foreach ( $companies as $company ) {
+
+				        $articles = $articles->concat($company->articles()->where( [
+					        [ 'date_start', '>=', $start_period ],
+					        [ 'date_end', '<=', $end_period ],
+					        [ 'category_id', $category ]
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+
+			        }
+			        foreach ( $vvt_types as $vvt_type ) {
+
+				        $articles = $articles->concat($vvt_type->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+						        [ 'category_id', $category ]
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+
+			        }
+			        foreach ( $personalities as $personality ) {
+
+				        $articles = $articles->concat($personality->articles()->where( [
+						        [ 'date_start', '>=', $start_period ],
+						        [ 'date_end', '<=', $end_period ],
+						        [ 'category_id', $category ]
+					        ] )->whereIn( 'report_id', $reports )->active()->get());
+
+			        }
+
+		        //отбираем недельные статьи которые вытянулсь на каждый тег
+			        if ( isset( $articles ) ) {
+				        //группируем все стаьи
+				        foreach ( $articles->groupBy( 'id' ) as $value ) {
+					        //если одна запись вытянулась на каждый тег
+					        if ( $value->count() == $tags_count ) {
+						        //добавляем ее в массив, передаваемый во вьюху
+						        $strong = $strong->concat($value);
+					        }
+				        };
+			        }
+
+			        $articles = isset( $strong ) ? $strong : collect( [] );
+			        $articles = $this->paginate($articles);
+			        $articles->appends($request->all())->setPath('search');
         }
+    }
+	        }
+
+
+
 
         return view('user.advan_search_result', compact('articles', 'report_type', 'start_period', 'end_period', 'countries', 'companies', 'personalities', 'vvt_types'));
     }
@@ -574,12 +326,12 @@ class HomeController extends Controller
     public function findinalltables ( $start_period, $end_period, &$articles ) {
 
 
-	      foreach ( ArticleReports::where([
-          ['date_start', '>=', $start_period],
-          ['date_end', '<=', $end_period],
-        ])->active()->paginate(30) as $item ) {
-            $articles[ 'weekly' ][ $item->id ] = $item;
-        };
+//	      foreach ( ArticleReports::where([
+//          ['date_start', '>=', $start_period],
+//          ['date_end', '<=', $end_period],
+//        ])->active()->paginate(30) as $item ) {
+//            $articles[ 'weekly' ][ $item->id ] = $item;
+//        };
 
 //foreach ( Weeklyarticle::without_tags()->where([
 //        foreach ( Weeklyarticle::where([
@@ -636,259 +388,55 @@ class HomeController extends Controller
 
     public function findbytagsinalltables ( $countries, $companies, $vvt_types, $personalities, $start_period, $end_period, &$articles ) {
 
+	    $articles = collect();
+
         //поиск всех статей содержащих указанные метки и упаковывание в ассоциативный массив
         foreach ( $countries as $country ) {
-            foreach ( $country->weeklyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'weekly' ][] = $item;
-            }
-
-            foreach ( $country->monthlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'monthly' ][] = $item;
-            }
-
-            foreach ( $country->yearlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'yearly' ][] = $item;
-            }
-
-            foreach ( $country->variousarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'various' ][] = $item;
-            }
-
-            foreach ( $country->plannedexhibitionarticles()->where([
-              ['start', '>=', $start_period],
-              ['fin', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'plannedexhibition' ][] = $item;
-            }
-
-            foreach ( $country->countrycatalogarticles()->where([
-              ['start_date', '>=', $start_period],
-              ['end_date', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'countrycatalog' ][] = $item;
-            }
-
-            /*foreach ( $country->exhibitionarticles()->where([
-              ['startdate', '>=', $start_period],
-              ['enddate', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'exhibition' ][] = $item;
-            }*/
+	        $articles = $articles->concat($country->articles()->where( [
+              ['date_start', '>=', $start_period],
+              ['date_end', '<=', $end_period],
+            ])->active()->get() );
 
         }
         foreach ( $companies as $company ) {
-            foreach ( $company->weeklyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'weekly' ][] = $item;
-            }
-            foreach ( $company->monthlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'monthly' ][] = $item;
-            }
-            foreach ( $company->yearlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'yearly' ][] = $item;
-            }
-            foreach ( $company->variousarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'various' ][] = $item;
-            }
-            foreach ( $company->plannedexhibitionarticles()->where([
-              ['start', '>=', $start_period],
-              ['fin', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'plannedexhibition' ][] = $item;
-            }
-            foreach ( $company->countrycatalogarticles()->where([
-              ['start_date', '>=', $start_period],
-              ['end_date', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'countrycatalog' ][] = $item;
-            }
-            /*foreach ( $company->exhibitionarticles()->where([
-              ['startdate', '>=', $start_period],
-              ['enddate', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'exhibition' ][] = $item;
-            }*/
+	        $articles = $articles->concat($company->articles()->where( [
+	            ['date_start', '>=', $start_period],
+	            ['date_end', '<=', $end_period],
+            ])->active()->get() );
+
         }
         foreach ( $vvt_types as $vvt_type ) {
-            foreach ( $vvt_type->weeklyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'weekly' ][] = $item;
-            }
-            foreach ( $vvt_type->monthlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'monthly' ][] = $item;
-            }
-            foreach ( $vvt_type->yearlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'yearly' ][] = $item;
-            }
-            foreach ( $vvt_type->variousarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'various' ][] = $item;
-            }
-            foreach ( $vvt_type->plannedexhibitionarticles()->where([
-              ['start', '>=', $start_period],
-              ['fin', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'plannedexhibition' ][] = $item;
-            }
-            foreach ( $vvt_type->countrycatalogarticles()->where([
-              ['start_date', '>=', $start_period],
-              ['end_date', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'countrycatalog' ][] = $item;
-            }
-            /*foreach ( $vvt_type->exhibitionarticles()->where([
-              ['startdate', '>=', $start_period],
-              ['enddate', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'exhibition' ][] = $item;
-            }*/
+	        $articles = $articles->concat($vvt_type->articles()->where( [
+	            ['date_start', '>=', $start_period],
+	            ['date_end', '<=', $end_period],
+            ])->active()->get() );
+
         }
         foreach ( $personalities as $personality ) {
-            foreach ( $personality->weeklyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'weekly' ][] = $item;
-            }
-            foreach ( $personality->monthlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'monthly' ][] = $item;
-            }
-            foreach ( $personality->yearlyarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'yearly' ][] = $item;
-            }
-            foreach ( $personality->variousarticles()->where([
-              ['start_period', '>=', $start_period],
-              ['end_period', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'various' ][] = $item;
-            }
-            foreach ( $personality->plannedexhibitionarticles()->where([
-              ['start', '>=', $start_period],
-              ['fin', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'plannedexhibition' ][] = $item;
-            }
-            foreach ( $personality->countrycatalogarticles()->where([
-              ['start_date', '>=', $start_period],
-              ['end_date', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'countrycatalog' ][] = $item;
-            }
-            /*foreach ( $personality->exhibitionarticles()->where([
-              ['startdate', '>=', $start_period],
-              ['enddate', '<=', $end_period],
-            ])->active()->get() as $item ) {
-                $articles[ 'exhibition' ][] = $item;
-            }*/
+	        $articles = $articles->concat($vvt_type->articles()->where( [
+	            ['date_start', '>=', $start_period],
+	            ['date_end', '<=', $end_period],
+            ])->active()->get() );
+
         }
 
         //Получаем количество отмеченных тегов
-        $tags_count = $countries->count() + $companies->count() + $vvt_types->count() + $personalities->count();
-        //отбираем недельные статьи которые вытянулсь на каждый тег
-        if ( isset($articles[ 'weekly' ]) ) {
-            //группируем все стаьи
-            foreach ( collect($articles[ 'weekly' ])->groupBy('id') as $value ) {
-                //если одна запись вытянулась на каждый тег
-                if ( $value->count() == $tags_count ) {
-                    //добавляем ее в массив, передаваемый во вьюху
-                    $strong[ 'weekly' ][] = $value->first();
-                }
-            };
-        }
-        //отбираем месячные статьи которые вытянулсь на каждый тег
-        if ( isset($articles[ 'monthly' ]) ) {
-            foreach ( collect($articles[ 'monthly' ])->groupBy('id') as $value ) {
-                if ( $value->count() == $tags_count ) {
-                    $strong[ 'monthly' ][] = $value->first();
-                }
-            };
-        }
-        //отбираем ежегодных статей которые вытянулсь на каждый тег
-        if ( isset($articles[ 'yearly' ]) ) {
+//        $tags_count = $countries->count() + $companies->count() + $vvt_types->count() + $personalities->count();
+//        //отбираем недельные статьи которые вытянулсь на каждый тег
+//        if ( isset($articles) ) {
+//            //группируем все стаьи
+//            foreach ( collect($articles)->groupBy('id') as $value ) {
+//                //если одна запись вытянулась на каждый тег
+//                if ( $value->count() == $tags_count ) {
+//                    //добавляем ее в массив, передаваемый во вьюху
+//                    $strong = $value->first();
+//                }
+//            };
+//        }
 
-            foreach ( collect($articles[ 'yearly' ])->groupBy('id') as $value ) {
-                if ( $value->count() == $tags_count ) {
-                    $strong[ 'yearly' ][] = $value->first();
-                }
-            };
-        }
-        //отбираем  статей иных материалов которые вытянулсь на каждый тег
-        if ( isset($articles[ 'various' ]) ) {
 
-            foreach ( collect($articles[ 'various' ])->groupBy('id') as $value ) {
-                if ( $value->count() == $tags_count ) {
-                    $strong[ 'various' ][] = $value->first();
-                }
-            };
-        }
-        //отбираем  статьи о запланированных выставках которые вытянулсь на каждый тег
-        if ( isset($articles[ 'plannedexhibition' ]) ) {
-
-            foreach ( collect($articles[ 'plannedexhibition' ])->groupBy('id') as $value ) {
-                if ( $value->count() == $tags_count ) {
-                    $strong[ 'plannedexhibition' ][] = $value->first();
-                }
-            };
-        }
-        //отбираем статьи о прошедших выставках которые вытянулсь на каждый тег
-        /*if ( isset($articles[ 'exhibition' ]) ) {
-            foreach ( collect($articles[ 'exhibition' ])->groupBy('id') as $value ) {
-                if ( $value->count() == $tags_count ) {
-                    $strong[ 'exhibition' ][] = $value->first();
-                }
-            };
-        }*/
-        //отбираем  статьи справочника государств которые вытянулсь на каждый тег
-        if ( isset($articles[ 'countrycatalog' ]) ) {
-
-            foreach ( collect($articles[ 'countrycatalog' ])->groupBy('id') as $value ) {
-                if ( $value->count() == $tags_count ) {
-                    $strong[ 'countrycatalog' ][] = $value->first();
-                }
-            };
-        }
-
-        $articles = isset($strong) ? $strong : collect([]);
-
+        //$articles = isset($strong) ? $strong : collect([]);
+//dd($articles);
         return $articles;
     }
 
@@ -937,6 +485,13 @@ class HomeController extends Controller
             return 0;
         }
     }
+
+	public function paginate($items, $perPage = 40, $page = null, $options = [])
+	{
+		$page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+		$items = $items instanceof Collection ? $items : Collection::make($items);
+		return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
+	}
 
     public function bug(Request $request){
 

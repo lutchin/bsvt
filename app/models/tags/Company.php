@@ -10,7 +10,7 @@ class Company extends Model
     protected $fillable = ['title'];
 
     public function articles () {
-        return $this->belongsToMany('App\Article');
+        return $this->belongsToMany('App\ArticleReports');
     }
 
     public function countries () {
