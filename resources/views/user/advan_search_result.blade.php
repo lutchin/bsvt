@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="pagination">{{ $articles->links() }}</div>
     <h3 class="full_row_center title">Результаты поиска</h3>
 
     <div class="container border search_result_box">
@@ -63,97 +64,31 @@
 
     <div class="container search_result_box_items">
         <hr>
-        @if(isset($articles['weekly']))
-            @foreach($articles['weekly'] as $item)
+        @if(isset($articles))
+            @foreach($articles as $item)
                 <div class="search_block">
-                    <a href="/weekly/article/{{$item->id}}" target="_blank" class="title_link text_decor">{{$item->title}}</a>
+                    <a href="/report/{{ $item->reports->types->slug }}/article/{{$item->id}}" target="_blank" class="title_link text_decor"> <?php echo
+	                    strip_tags ($item->title, "<p><a><h1><h2><h3><h4><h5><h6>");
+	                    ?></a>
                     <p><!--strong>Анонс:</strong-->
-                     {{ mb_substr(ltrim(html_entity_decode(strip_tags($item->body))),0,200) }}
+                     {{ mb_substr(ltrim(html_entity_decode(strip_tags($item->description))),0,200) }}
 
                     </p>
                     <p>
-                        <strong>Отчет: </strong> <a class="report" href="/weekly/show/{{$item->weeklyreport_id}}"
-                                                    target="_blank">Еженедельный дайжест "Еженедельный обзор ВПО и ВТИ" за период от {{date("d.m.Y",$item->weeklyreport->start_date)}} по {{date("d.m.Y",$item->weeklyreport->end_date)}}</a>
+                        <strong>Отчет: </strong> <a class="report" href="/report/{{ $item->reports->types->slug }}/show/{{$item->report_id}}"
+                                                    target="_blank">Еженедельный дайжест "Еженедельный обзор ВПО и ВТИ" за период от {{date("d.m.Y",$item->reports->date_start)}} по {{date("d.m.Y",$item->reports->date_end)}}</a>
                     </p>
-                    <p><strong>Раздел: </strong> {{\App\Category::find($item->category_id)->title}}</p>
-                </div>
-            @endforeach
-        @endif
-        @if(isset($articles['monthly']))
-            @foreach($articles['monthly'] as $item)
-                @if(isset($item->monthlyreport))
-                <div class="search_block">
-                    <a href="/monthly/article/{{$item->id}}" target="_blank" class="title_link text_decor">{{$item->title}}</a>
-                    <p><!--<strong>Кpаткое описание:</strong>-->
-                        {{ mb_substr(html_entity_decode(strip_tags($item->body)),0,200) }}
-                    </p>
-                    <p>
-                        <strong>Отчет: </strong> <a class="report"
-                                                   href="/monthly/show/{{$item->monthlyreport_id}}">Ежемесячный
-                                                                                                  дайжест "Некоторые аспекты развития вооружений, военной и специальной техники за рубежом за период от {{date("d.m.Y",$item->monthlyreport->start_date)}} по {{date("d.m.Y",$item->monthlyreport->end_date)}}</a>
-                    </p>
-                    <p><strong>Раздел: </strong> {{\App\Category::find($item->category_id)->title}}</p>
-                   @if(isset($item->subcategory_id))
-                    <p><strong>Позраздел:</strong> {{\App\Subcategory::find($item->subcategory_id)->title}}</p>
-                    @endif
-                </div>
-                @endif
-            @endforeach
-        @endif
-        @if(isset($articles['yearly']))
-            @foreach($articles['yearly'] as $item)
-                <div class="search_block">
-                    <a href="/yearly/article/{{$item->id}}" target="_blank" class="title_link text_decor">{{$item->title}}</a>
-                    <p><!--strong>Анонс:</strong-->
-                        {{ mb_substr(html_entity_decode(strip_tags($item->body)),0,200) }}
-                    </p>
-                    @if(isset($item->subcategory))
-                        <p>
-                            <strong>Отчет: </strong><a class="report" href="/yearly/show/{{$item->yearlyreport_id}}">
-                                Ежегодный
-                                                                                                       дайжест "Некоторые аспекты развития вооружений, военной и специальной техники за рубежом за период от {{date("d.m.Y",$item->subcategory->category->report->start_date)}} по {{date("d.m.Y",$item->subcategory->category->report->end_date)}}</a>
-                        </p>
-
-                        <p><strong>Раздел: </strong> {{ $item->subcategory->category->title }}</p>
-                        <p><strong>Позраздел: </strong> {{ $item->subcategory->title }}</p>
-                    @elseif(isset($item->category))
-                        <p>
-                            <strong>Отчет: </strong> <a class="report"
-                                                       href="/yearly/show/{{$item->yearlyreport_id}}">Ежегодный
-                                                                                                       дайжест "Некоторые аспекты развития вооружений, военной и специальной техники за рубежом за период от {{date("d.m.Y",$item->category->report->start_date)}} по {{date("d.m.Y",$item->category->report->end_date)}}</a>
-                        </p>
-                        <p><strong>Раздел: </strong> {{ $item->category->title }}
-                    @else
-                        <p>
-                            <strong>Отчет: </strong> <a class="report"
-                                                        href="/yearly/show/{{$item->yearlyreport_id}}">Ежегодный
-                                дайжест "Некоторые аспекты развития вооружений, военной и специальной техники за рубежом за период от {{date("d.m.Y",$item->report->start_date)}} по {{date("d.m.Y",$item->report->end_date)}}</a>
-                        </p>
-
+                    @if($item->category_id !== 0)<p><strong>Раздел: </strong> {{\App\Category::find($item->category_id)->title}}</p>@endif
+                    @if(isset($item->subcategory_id))
+                        <p><strong>Позраздел:</strong> {{\App\Subcategory::find($item->subcategory_id)->title}}</p>
                     @endif
                 </div>
             @endforeach
-
+                <div class="pagination">{{ $articles->links() }}</div>
         @endif
-        @if(isset($articles['countrycatalog']))
-            @foreach($articles['countrycatalog'] as $item)
-                <div class="search_block">
-                    <a href="/countrycatalog/article/{{$item->id}}/{{ $item->region->countrycatalog->id }}" target="_blank" class="title_link text_decor">{{$item->title}}</a>
-                    <p><!--strong>Анонс:</strong-->
-                        {{ mb_substr(html_entity_decode(strip_tags($item->overview)),0,200) }}
-                    </p>
 
-                    <p>
-                        <strong>Отчет: </strong><a class="report"
-                                                  href="/countrycatalog/show/{{$item->region_id}}">Справочник по
-                                                                                                    иностранным государствам за период от {{date("d.m.Y",$item->region->countrycatalog->start_date)}} по {{date("d.m.Y",$item->region->countrycatalog->end_date)}}</a>
-                    </p>
 
-                    <p><strong>Регион: </strong> {{ $item->region->title }}</p>
-                </div>
-            @endforeach
 
-        @endif
 
 
         @if(isset($articles['plannedexhibition']))
@@ -191,53 +126,8 @@
             @endforeach
 
         @endif
-        @if(isset($articles['exhibition']))
-            @foreach($articles['exhibition'] as $item)
-                <div class="search_block">
-                    <a href="/exhibition/article/{{$item->id}}" target="_blank" class="title_link text_decor">{{$item->title}}</a>
-                    <p><!--strong>Анонс:</strong-->
-                        {{ mb_substr(html_entity_decode(strip_tags($item->theme)),0,200) }}
-                    </p>
 
-                    <p>
-                        <strong>Отчет: </strong><a class="report" href="/exhibition/show/{{$item->exhibition_id}}">
-                            Выставка за
-                                                                                                     период от {{date("d.m.Y",$item->exhibitionyear->start_date)}} по {{date("d.m.Y",$item->exhibitionyear->end_date)}}</a>
-                    </p>
 
-                    <p><strong>Раздел: </strong> Выставки за {{ $item->exhibitionyear->year }} год</p>
-                </div>
-            @endforeach
-
-        @endif
-        @if(isset($articles['various']))
-            @foreach($articles['various'] as $item)
-                @if(isset($item->report))
-                <div class="search_block">
-                    <a href="/various/article/{{$item->id}}" target="_blank" class="title_link text_decor">{{$item->title}}</a>
-                    <p><!--strong>Анонс:</strong-->
-                        {{ mb_substr(html_entity_decode(strip_tags($item->body)),0,200) }}
-                    </p>
-                    {{--@if(isset($item->subcategory))--}}
-                        <p>
-                            <strong>Отчет: </strong><a class="report" href="/various/show/{{$item->variousreport_id}}"> {{ $item->report->number }} за
-                                                                                                   период от {{date("d.m.Y",$item->report->start_date)}} по {{date("d.m.Y",$item->report->end_date)}}</a>
-                        </p>
-                        {{--<p><strong>Раздел: </strong> {{ $item->subcategory->category->title }}</p>--}}
-                        {{--<p><strong>Позраздел: </strong> {{ $item->subcategory->title }}</p>--}}
-                    {{--@else--}}
-                        {{--<p>--}}
-                            {{--<strong>Отчет: </strong><a class="report" href="/various/show/{{$item->various_id}}"> Иные--}}
-                                                                                                            {{--материалы за--}}
-                                                                                                   {{--рубежом за период от {{date("d.m.Y",$item->category->report->start_date)}} по {{date("d.m.Y",$item->category->report->end_date)}}</a>--}}
-                        {{--</p>--}}
-                        {{--<p><strong>Раздел: </strong> {{ $item->category->title }}--}}
-                    {{--@endif--}}
-                </div>
-                @endif
-            @endforeach
-
-        @endif
 
 
         <div class="row box_save_article mt30">

@@ -35,6 +35,7 @@ Route::middleware('checkuser')->group(function()
 	Route::get('/report', 'User\HomeController@index')->name('home');
     Route::post('/api/search', 'User\HomeController@apisearch');
     Route::get('/search/form', 'User\HomeController@advanced_search_form');
+	Route::get('/search', 'User\HomeController@advanced_search');
     Route::post('/search', 'User\HomeController@advanced_search');
     Route::get('/simply_search/{q}', 'User\HomeController@search');
 	Route::post('/simply_search', 'User\HomeController@search');

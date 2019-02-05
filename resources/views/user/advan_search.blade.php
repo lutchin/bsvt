@@ -8,7 +8,7 @@ $y = date("Y");
 @section('content')
     <div class="container">
         <h3 class="full_row_center title">Расширенный поиск</h3>
-        <form action="/search" method="post">
+        <form action="/search" method="get">
             @csrf
             <div class="col-md-12">
                 <div class="row row_panel">
