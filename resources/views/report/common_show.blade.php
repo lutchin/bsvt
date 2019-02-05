@@ -54,7 +54,7 @@ $y = date("Y");
                                             <span>{{ $cat }}</span>
                                     @endif
                                     <span>
-                                    <a target="_blank" href="/pdf_category/{{$report->id}}/{{ \App\Category::where('title',$cat)->first()->id }}" class="pdf"></a>
+                                    <a target="_blank" href="/pdf_category/{{$report->id}}/{{ $categories->where('title',$cat)->first()->id }}" class="pdf"></a>
                                     </span>
                                     </p>
                                 </div>

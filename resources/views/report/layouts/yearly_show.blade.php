@@ -4,7 +4,7 @@
         <p class="pdf_box">
                 {{ $subcat}}
                 <span>
-                   <a target="_blank" href="/pdf_subcategory/{{$report->id}}/{{ \App\Category::where('title',$cat)->first()->id }}/{{\App\Subcategory::where('title',$subcat)->first()->id}}" class="pdf"></a>
+                   <a target="_blank" href="/pdf_subcategory/{{$report->id}}/{{ $categories->where('title',$cat)->first()->id }}/{{$subcategories->where('title',$subcat)->first()->id}}" class="pdf"></a>
                    </span>
             </p>
         @endif

@@ -60,43 +60,45 @@ class ReportController extends Controller
 
 	    }
 
+
+
+
         //dd($articles[0]);
         //dump($categories);
         $page = null;
         if($slug != 'plannedexhibition') {
             $articles = $report->articles()->where('report_id', $report->id )->get();
+
+            $subcategories = Subcategory::whereIn('id',array_unique($articles->pluck('subcategory_id')->toArray()))->
+                select('id','title')->get();
+
             foreach ( $articles as $article ) {
                 if($article->category_id)
                     foreach ( $categories as $category ) {
                         if ( $article->category_id == $category->id ) {
-                            $subcategory = $article->subcategory_id != false ?  $article->subcategory->title: false; // problem
+                            $subcategory = $article->subcategory_id != false ?
+                                $subcategories->where('id',$article->subcategory_id)->first()->title: false; // problem
                             $items[ $category->title ][$subcategory] [] = $article;
                             //Subcategory::select('title')->where('id',$article->subcategory_id)->get()
                         }
                     }
                 else {
-                    $subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
+                    $subcategory = $article->subcategory_id != false ? $subcategories->where('id',$article->subcategory_id)->first()->title: false;
                     $items[ false][$subcategory] [] = $article;
                 }
+                }
+                $template = 'report.common_show';
             }
-            $template = 'report.common_show';
-        }
 		    else {
 
                 $items = $report->articles()->where('report_id', $report->id )->paginate(10);
                 $template = 'report.plannedexhibition.item';
                 $page = $request->page;
             }
-          //  dd($items);
 
-//        dd(Subcategory::where('title','Итоговая часть')->get());
-//        dump($items);
-       // return 123;
+//            dd($subcategories->where('id',13)->get('title'));
 
-//        dd($items);
-
-
-        return view($template, compact('report', 'items','page'));
+        return view($template, compact('report', 'items','page','subcategories','categories'));
     }
 
     public function item_article ( $slug,  ArticleReports $article ) {
@@ -467,28 +469,37 @@ class ReportController extends Controller
     }
 
     public function updreport ( $slug, Request $request,Report $report ) {
-        $request->validate([
-          'number' => 'required',
-          'start_period' => 'required',
-          'end_period' => 'required',
-        ]);
-        
-        $start_period = $request->input('start_period');
-        $end_period   = $request->input('end_period');
-        $number   = $request->input('number');
 
-            $report->date_start = $start_period;
-            $report->date_end   = $end_period;
+        $report_slug = $report->types->slug;
 
-            $report->number       = $number;
+
+        $report->date_start = $request->input('start_period');
+        $report->date_end    = $request->input('end_period');
+
+        if($report_slug=='weekly' || $report_slug=='monthly'){
+
+            $request->validate([
+                'number' => 'required',
+                'start_period' => 'required',
+                'end_period' => 'required',
+            ]);
+            $report->number   = $request->input('number');
+        }
+
+        elseif($report_slug=='various') {
+            $request->validate([
+                'title' => 'required',
+                'start_period' => 'required',
+                'end_period' => 'required',
+            ]);
+            $report->title = $request->title;
+        }
+
             $report->save();
 
             $path = '/report/'. $report->types->slug;
 
             return redirect()->to($path)->with('status', 'Отчет отредактирован');
-
-
-
     }
     
     public function upd_form ( $slug, ArticleReports $article ) {

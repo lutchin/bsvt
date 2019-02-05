@@ -172,26 +172,25 @@ class PdfController extends Controller {
 			$categories  = Category::where('report_type_id', $report->types->id)->get();
 
 		} else {
-
 			$categories  = Category::where('report_id', $report->id)->get();
-
 		}
-
-
 
 		if($report_slug != 'plannedexhibition') {
 			$articles    = $report->articles()->with('category')->get();
+			$subcategories = Subcategory::whereIn('id',array_unique($articles->pluck('subcategory_id')->toArray()))->
+			select('id','title')->get();
+
 			foreach ($articles as $article) {
 				if ($article->category_id)
 					foreach ($categories as $category) {
 						if ($article->category_id == $category->id) {
-							$subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
+							$subcategory = $article->subcategory_id != false ? $subcategories->where('id',$article->subcategory_id)->first()->title: false;
 							$items[$category->title][$subcategory] [] = $article;
 
 						}
 					}
 				else {
-					$subcategory = $article->subcategory_id != false ? $article->subcategory->title : false;
+					$subcategory = $article->subcategory_id != false ? $subcategories->where('id',$article->subcategory_id)->first()->title : false;
 					$items[false][$subcategory] [] = $article;
 				}
 			}
