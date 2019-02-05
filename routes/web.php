@@ -276,6 +276,8 @@ Route::get('/pdf_item/{id}', 'Pdf\PdfController@pdf_item');
 
 Route::get('/pdf_category/{report_id}/{category_id}', 'Pdf\PdfController@pdf_category');
 
+Route::post('/pdf_search','Pdf\PdfController@pdf_search');
+
 //Route::get('/{report}/pdf_category/{id}/{cat_id?}', 'Pdf\PdfController@pdf_category');
 
 

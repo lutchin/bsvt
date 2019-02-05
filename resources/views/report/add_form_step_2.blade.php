@@ -77,7 +77,7 @@
 						</a>
 					@endif
 
-					@if( empty($subcategories[$cat]) && $report->types->slug != 'various' && $cat)
+					@if( empty($subcategories[$cat]) && $report->types->slug != 'various' && $cat || ($report->types->slug == 'yearly' && $cat))
 						<a href="/report/{{ $report->types->slug }}/add3/{{$report->id}}/{{$cat}}"><button class="butt butt_def butt_min butt_add butt_small">Добавить материал</button></a>
 					@endif
 

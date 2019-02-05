@@ -13020,3 +13020,20 @@ table {
   position: absolute;
   top: -9999px;
 }
+
+
+
+.search_block {
+  position: relative;
+}
+
+.pdf-checkbox {
+  position: absolute;
+  right: 20px;
+  top:20px;
+  display: flex;
+  align-items: center;
+}
+.pdf-checkbox input {
+  height: unset;
+}

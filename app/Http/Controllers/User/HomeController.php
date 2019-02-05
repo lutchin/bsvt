@@ -32,7 +32,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-use App\Report;
 
 class HomeController extends Controller
 {
@@ -66,7 +65,7 @@ class HomeController extends Controller
             }
         }
         
-        return view('user.home', compact('title', 'week_articles', 'month_articles', 'year_articles', 'various_articles', 'countrycatalogs', 'plannedexhibitionsyears','total_array'));
+        return view('user.home', compact('title', 'total_array'));
     }
 
     public function cabinet ( User $user ) {
@@ -90,9 +89,9 @@ class HomeController extends Controller
 
 	    }
 
-		//$results = ArticleReports::search($q)->active()->paginate(40);
+		$results = ArticleReports::search($q)->active()->paginate(40);
 
-	    $results = ArticleReports::search($q, $size);
+//	    $results = ArticleReports::search($q, $size);
 	    if($request->ajax()){
 
 //		    foreach( $results as $article) {
@@ -100,9 +99,7 @@ class HomeController extends Controller
 //			   $article->titleTags($article->title);
 //
 //            }
-
 		    return   $results;
-
 	    }
 
         return view('user.simplysearch', compact('results'));

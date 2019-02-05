@@ -67,9 +67,14 @@
         @if(isset($articles))
             @foreach($articles as $item)
                 <div class="search_block">
-                    <a href="/report/{{ $item->reports->types->slug }}/article/{{$item->id}}" target="_blank" class="title_link text_decor"> <?php echo
+                    <a href="/report/{{ $item->reports->types->slug }}/article/{{$item->id}}" target="_blank" class="title_link text_decor">
+
+                        <?php echo
 	                    strip_tags ($item->title, "<p><a><h1><h2><h3><h4><h5><h6>");
 	                    ?></a>
+                    <label class="pdf-checkbox">
+                        <input type="checkbox" value="{{$item->id}}"><span class="pdf"></span>
+                    </label>
                     <p><!--strong>Анонс:</strong-->
                      {{ mb_substr(ltrim(html_entity_decode(strip_tags($item->description))),0,200) }}
 
@@ -131,10 +136,11 @@
 
 
         <div class="row box_save_article mt30">
-            <a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
+            <a href="{{ URL::previous() }}" class="button butt_back">Назад</a> <button class="button butt_def show_pdf_search">Показать в PDF</button>
         </div>
 
     </div>
 
 @endsection
-    
+
+

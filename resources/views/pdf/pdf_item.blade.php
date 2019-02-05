@@ -10,6 +10,8 @@
         <h3 class="title" style="text-align: center">{{ $report->types->title }} за {{ date('Y', $report->date_start) }} год</h3>
         @elseif($report_slug=='various')
         <h3 class="title" style="text-align: center">{{$report->types->title}}</h3>
+        @elseif($report_slug=='search')
+        <h3 class="title" style="text-align: center">Результаты поиска</h3>
     @endif
     @if(!empty($items))
         @foreach($items as  $category =>$sub_cats)

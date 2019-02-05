@@ -229,6 +229,8 @@
                     @endif
                     @break
                 @endswitch
+
+
                 <!-- {{ $article->report }}
                 <p><strong>Раздел:</strong>
                     @if(isset($article->subcategory))

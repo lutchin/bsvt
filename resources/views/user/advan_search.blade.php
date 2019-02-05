@@ -136,13 +136,13 @@ $y = date("Y");
             </div>--}}
 
             <div class="row box_save_article">
-                <button class="button_save butt butt_def">Поиск</button>
+                <button class="button_save butt butt_def pdf-reset">Поиск</button>
             </div>
 
             <tagsforsearch-component></tagsforsearch-component>
 
             <div class="row box_save_article">
-                <button class="button_save butt butt_def">Поиск</button>
+                <button class="button_save butt butt_def pdf-reset">Поиск</button>
             </div>
         </form>
     </div>

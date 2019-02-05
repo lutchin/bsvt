@@ -23,6 +23,9 @@ use App\models\analyst\exhibitions\Plannedexhibitionyear;
 use App\ReportType;
 use App\Category;
 use App\Subcategory;
+use GuzzleHttp\Psr7\Request;
+
+use Illuminate\Http\Request as RequestSearchPdf;
 
 
 class PdfController extends Controller {
@@ -272,6 +275,23 @@ class PdfController extends Controller {
 	}
 
 /**********************************************************************************************************************/
+	public function pdf_search(RequestSearchPdf $request)
+	{
+
+//		dump($request->id);
+
+			$articles = ArticleReports::whereIn('id',$request->id)->get();
+			$format = ['format' => 'A4'];
+			foreach ($articles as $article) {
+					$items[false][false] [] = $article;
+			}
+			$report_slug = 'search';
+			$template = 'pdf.pdf_item';
+
+			$pdf = \PDF::loadView($template, compact('report', 'items','report_slug','descriptions'), [], $format);
+			return $pdf->stream( 'Результаты поиска' .'.pdf' );
+	}
+
 	public function setTitle( $report ){
 
 		switch ( $report->types->slug ) {

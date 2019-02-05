@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Elasticquent\ElasticquentTrait;
+//use Elasticquent\ElasticquentTrait;
 
 class ArticleReports extends Model
 {
@@ -16,29 +16,29 @@ class ArticleReports extends Model
 		'status',
 		'description',
 	];
-	//use SearchableTrait;
-	use ElasticquentTrait;
+	use SearchableTrait;
+//	use ElasticquentTrait;
 
 	/**
 	 * Searchable rules.
 	 *
 	 * @var array
 	 */
-//	protected $searchable = [
-//		/**
-//		 * Columns and their priority in search results.
-//		 * Columns with higher values are more important.
-//		 * Columns with equal values have equal importance.
-//		 *
-//		 * @var array
-//		 */
-//		'columns' => [
-//			'article_reports.title' => 10,
-//			'article_reports.place' => 10,
-//			'article_reports.description' => 10,
-//
-//		],
-//	];
+	protected $searchable = [
+		/**
+		 * Columns and their priority in search results.
+		 * Columns with higher values are more important.
+		 * Columns with equal values have equal importance.
+		 *
+		 * @var array
+		 */
+		'columns' => [
+			'article_reports.title' => 10,
+			'article_reports.place' => 10,
+			'article_reports.description' => 10,
+
+		],
+	];
 
 	protected $mappingProperties = [
 
