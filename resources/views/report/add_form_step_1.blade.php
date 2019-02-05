@@ -35,6 +35,12 @@ $y = date("Y");
 		        	<input name="number" value="" placeholder="№"/>
 		        </span>
                 @endif
+                @if ($report_type->slug == 'various')
+                    <span>&nbsp;Название отчета&nbsp;</span>
+                    <span>
+		        	<input name="title" value=""/>
+		        </span>
+                @endif
             </div>
             <div class="row box_save_article mt30">
             	<a href="{{ URL::previous() }}" class="button butt_back">Назад</a>

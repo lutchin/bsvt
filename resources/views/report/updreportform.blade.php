@@ -29,10 +29,18 @@ $y = date("Y");
 		        	<input name="end_period_picker" value="" class="calendar_end_3"/>
 		        	<input type="hidden" value="<?php echo $report->date_end; ?>" name="end_period">
 		        </span>
+                @if ($report->types->slug == 'weekly' || $report->types->slug == 'monthly')
+
 		        <span>&nbsp;номер отчета&nbsp;</span>
                 <span>
 		        	<input name="number" type="text" value="{{ $report->number }}" placeholder="№"/>
 		        </span>
+                @elseif ($report->types->slug == 'various')
+                    <span>&nbsp;Новое название отчета&nbsp;</span>
+                    <span>
+		        	<input name="title" value="{{ $report->title }}"/>
+		        </span>
+                @endif
             </div>
             <div class="row box_save_article mt30">
                 <a href="{{ URL::previous() }}" class="button butt_back">Назад</a>

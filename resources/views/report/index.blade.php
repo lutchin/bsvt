@@ -37,14 +37,20 @@
                         </td>
                         <td class="table_name">
                             <a href="/report/{{$report_type->slug}}/show/{{ $item['id']}}">
-                                {{$report_type->title}}
-                                @if($report_type->slug == 'weekly' || $report_type->slug == 'monthly' )
-                                № {{ $item['number'] }} за период от {{ date("d.m",$item['date_start'])  }} до {{ date("d.m.Y",$item['date_end']) }}
-                                @else
-                                за {{ date("Y",$item['date_start']) }} год.
 
+
+                                @if($report_type->slug == 'weekly' || $report_type->slug == 'monthly' )
+                                    {{$report_type->title}} № {{ $item['number'] }} за период от {{ date("d.m",$item['date_start'])  }} до {{ date("d.m.Y",$item['date_end']) }}
+                                @elseif($report_type->slug == 'various')
+                                    {{$item->title}}
+                                @else
+                                    {{$report_type->title}}   за {{ date("Y",$item['date_start']) }} год.
                                 @endif
+
+
                             </a>
+                            @if($report_type->slug == 'plannedexhibition') <a target="_blank" href="/pdf_item/{{$item->id}}" class="pdf exhibition"></a>@endif
+
                             @if( $role != 'user' && $role !='employee' )
                             <a class="link-edit" href="/report/{{$report_type->slug}}/updreport/{{ $item->id }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                             @endif
@@ -84,15 +90,11 @@
 	                                @csrf
 	                                <button class="text_decor link">Опубликовать</button>
 	                            </form>
-	                              
+
 	                        @elseif($item['status'] == 2)
-	                        
 	                        	    Опубликован
-	                        	    
                             @elseif($item['status'] == -1)
-                            
                             	Нет материалов
-                            	
                             @else
                                 <a class="text_decor red" href="/report/{{$report_type->slug}}/add2/{{ $item['id'] }}">Утвердите материалы</a>
                             @endif 

@@ -81,7 +81,7 @@
 				<?php echo strip_tags($item['title'], "<p><a>");?>
 			</td>
 			<td class="center">
-				{{ date("d",$item['date_start']) }} - {{ date("d",$item['date_end']) }} </br> {{ Helper::getMonthText(date("m",$item['date_end'])) }}
+				{{ date("d",$item['date_start']) }} - {{ date("d",$item['date_end']) }} <br> {{ Helper::getMonthText(date("m",$item['date_end'])) }}
 			</td>
 			<td>
         		<?php echo strip_tags($item['place'], "<p><a>");?>

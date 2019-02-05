@@ -4,50 +4,6 @@ $m = date("m");
 $y = date("Y");
 
 $count = cal_days_in_month(CAL_GREGORIAN, $m, $y);
-
-switch ( $m ) {
-    case 1:
-        $m_name = 'января';
-        break;
-    case 2:
-        $m_name = 'февраля';
-        break;
-    case 3:
-        $m_name = 'марта';
-        break;
-    case 4:
-        $m_name = 'апреля';
-        break;
-    case 5:
-        $m_name = 'мая';
-        break;
-    case 6:
-        $m_name = 'июня';
-        break;
-    case 7:
-        $m_name = 'июля';
-        break;
-    case 8:
-        $m_name = 'августа';
-        break;
-    case 9:
-        $m_name = 'сентября';
-        break;
-    case 10:
-        $m_name = 'октября';
-        break;
-    case 11:
-        $m_name = 'ноября';
-        break;
-    case 12:
-        $m_name = 'декабря';
-        break;
-    default:
-        $m      = "Ошибка даты";
-        $m_name = "";
-        break;
-
-}
 ?>
 @extends('layouts.app')
 
