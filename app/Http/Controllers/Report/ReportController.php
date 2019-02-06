@@ -26,21 +26,24 @@ class ReportController extends Controller
     }
 
 
-    public function report_list ( $slug ) {
+    public function report_list ( $slug ,Request $request) {
 
 	    $report_type = ReportType::where('slug' , $slug)->first();
 
+        $count = 20;
+
 	    if( $this->role() == 'user' || $this->role() =='employee' ){
 
-		    $reports     = Report::where('type_id', $report_type->id )->active()->paginate(20);
+		    $reports     = Report::where('type_id', $report_type->id )->active()->paginate($count);
 
 	    } else {
 
-		    $reports     = Report::where('type_id', $report_type->id )->paginate(20);
+		    $reports     = Report::where('type_id', $report_type->id )->paginate($count);
 	    }
 
+        $page = $request->page;
 
-	    return view('report.index', compact('reports', 'report_type'));
+	    return view('report.index', compact('reports', 'report_type','page','count'));
 
     }
 
@@ -156,15 +159,35 @@ class ReportController extends Controller
         return redirect()->back()->with('status', 'Материал удален');
     }
 
-    public function delete_category ( Weeklyreport $weeklyreport, $category_id ) {
-        $category = $weeklyreport->articles()->where('category_id', $category_id)->get();
-        foreach ( $category as $article ) {
-            $pics = $article->weeklyimages()->get();
+    public function delete_subcategory ( $slug, Subcategory $subcategory ) {
+        foreach ( $subcategory->article_reports as $article ) {
+            $pics = $article->images()->get();
             foreach ( $pics as $pic ) {
                 Storage::disk('bsvt')->delete([$pic->image, $pic->thumbnail]);
             }
-            $article->weeklyimages()->delete();
-            $article->weeklyimages()->delete();
+            $article->images()->delete();
+            $article->companies()->detach();
+            $article->countries()->detach();
+            $article->vvttypes()->detach();
+            $article->personalities()->detach();
+            $article->delete();
+        }
+        $subcategory->delete();
+
+        return redirect()->back()->with('status', 'Подраздел удален');
+
+    }
+
+    public function delete_category ($slug,Category $category) {
+
+        $articles = $category->article_reports()->get();
+        foreach ( $articles as $article ) {
+            $pics = $article->images()->get();
+            foreach ( $pics as $pic ) {
+                Storage::disk('bsvt')->delete([$pic->image, $pic->thumbnail]);
+            }
+            $article->images()->delete();
+            $article->images()->delete();
 			
             $article->companies()->detach();
             $article->countries()->detach();
@@ -173,6 +196,7 @@ class ReportController extends Controller
 			
             $article->delete();
         }
+        $category->delete();
 
         return redirect()->back()->with('status', 'Раздел удален');
 
@@ -246,26 +270,34 @@ class ReportController extends Controller
 
 	    $report_type = ReportType::where('slug' , $slug)->first();
 
-		if( $slug == 'weekly' || $slug == 'monthly' ) {
+        if($slug=='weekly' || $slug=='monthly'){
+            $request->validate([
+                'number' => 'required',
+                'date_start' => 'required',
+                'date_end' => 'required',
+            ]);
+        }
 
-        $request->validate([
-          'number' => 'required',
-          'date_start' => 'required',
-          'date_end' => 'required',
+        elseif($slug=='various') {
+            $request->validate([
+                'title' => 'required',
+                'date_start' => 'required',
+                'date_end' => 'required',
+            ]);
+        }
+
+        else $request->validate([
+            'date_start' => 'required',
+            'date_end' => 'required',
         ]);
 
-		} else {
+//        dd( $request->title);
 
-			$request->validate([
-				'date_start' => 'required',
-				'date_end' => 'required',
-			]);
-
-		}
         $date_start = $request->input('date_start');
         $date_end   = $request->input('date_end');
         $number   = $request->input('number');
-	
+	    $title = $request->title;
+
 		if(($date_end - $date_start) < 0) { //++
 			return redirect()->refresh()->with('status', 'Неправильный промежуток');
             die();
@@ -275,8 +307,8 @@ class ReportController extends Controller
           'number'       => $number,
           'date_start'   => $date_start,
           'date_end'     => $date_end,
-	      'type_id'      => $report_type->id
-
+	      'type_id'      => $report_type->id,
+            'title'=>$title
         ])->get();
 		
         if ( $created_report->count() ) {
@@ -293,6 +325,7 @@ class ReportController extends Controller
             $report->date_end   = $date_end;
             $report->number     = $number;
             $report->type_id    = $report_type->id;
+            $report->title      = $title;
             $report->save();
             
             $path = '/report/'. $report_type->slug .'/add2/'. $report->id;
@@ -307,11 +340,11 @@ class ReportController extends Controller
         
     	if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 		     $categories  = Category::where('report_type_id', $report->types->id);
-//            $categories_id = $categories->pluck('id')->toArray();
+            $categories_id = $categories->pluck('id')->toArray();
             $categories = $categories->get();
 	    } else {
 		    $categories  = Category::where('report_id', $report->id);
-//            $categories_id = $categories->pluck('id')->toArray();
+           $categories_id = $categories->pluck('id')->toArray();
             $categories = $categories->get();
 	    }
 
@@ -320,26 +353,66 @@ class ReportController extends Controller
 
 
 
-        foreach ( $articles as $article ) {
+        $subcategories_array = Subcategory::whereIn('category_id',$categories_id)->get();
+//      dd($subcategories_array);
+
+
+//        foreach ( $articles as $article ) {
+//            if ($article->category_id) {
+//                foreach ($categories as $category) {
+//                    if ($article->category_id == $category->id) {
+//                        $subcategory = $article->subcategory_id != false ? $article->subcategory_id : false; // problem
+//                        $items[$article->category_id][$subcategory][] = $article;
+//                        if ($subcategory) {
+//                            $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
+//                        }
+//                    }
+//                }
+//            }
+//                else {
+//                    $subcategory = $article->subcategory_id != false ?  $article->subcategory_id: false; // problem
+//                    $items[false][$subcategory][] = $article;
+//                    if($subcategory) {
+//                        $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
+//                    }
+//                }
+//            }
+
+
+        $items = [];
+
+        foreach ($categories as $category) {
+            $items[$category->id] = [];
+        }
+        foreach ($subcategories_array as $subcategory)
+        {
+            $items[$subcategory->category_id][$subcategory->id] = [];
+            $subcategories[$subcategory->category_id][$subcategory->id] = $subcategory->title;
+        }
+
+        foreach ($articles as $key => $article) {
             if ($article->category_id) {
-                foreach ($categories as $category) {
-                    if ($article->category_id == $category->id) {
-                        $subcategory = $article->subcategory_id != false ? $article->subcategory_id : false; // problem
-                        $items[$article->category_id][$subcategory][] = $article;
-                        if ($subcategory) {
-                            $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
-                        }
-                    }
-                }
+                    $subcategory = $article->subcategory_id != false ? $article->subcategory_id : false; // problem
+                    $items[$article->category_id][$subcategory][] = $articles->pull($key);
+//                    if ($subcategory) {
+//                        $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
+//                    }
+
             }
-                else {
-                    $subcategory = $article->subcategory_id != false ?  $article->subcategory_id: false; // problem
-                    $items[false][$subcategory][] = $article;
-                    if($subcategory) {
-                        $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
-                    }
-                }
-            }
+        }
+
+
+        foreach ($articles as $key => $article) {
+            $subcategory = $article->subcategory_id != false ?  $article->subcategory_id: false; // problem
+            $items[false][$subcategory][] = $article;
+//            if($subcategory) {
+//                $subcategories[$article->category_id][$article->subcategory_id] = $article->subcategory->title;
+//            }
+        }
+
+//        dump($items);
+//    dd($subcategories);
+
 
         return view('report.add_form_step_2', compact('report', 'items', 'categories','subcategories')
 
@@ -352,6 +425,10 @@ class ReportController extends Controller
     }
 
     public function create3 ( Request $request, $flag = null ) {
+
+
+//        dd($request->all());
+
 
         $this->validate($request, [
             'editor1' => 'required',
@@ -402,12 +479,12 @@ class ReportController extends Controller
 
 	        $subcategory = Subcategory::find($subcategory);
 	        $article->subcategory()->associate($subcategory);
+            $category = Category::find($category);
+            $article->category()->associate($category);
 
         } else {
-
 	        $category = Category::find($category);
 	        $article->category()->associate($category);
-
         }
 
         $article->save();
@@ -444,25 +521,6 @@ class ReportController extends Controller
         return redirect()->to($path)->with('status', 'Статья создана');
     }
 
-	public function delete_subcategory ( $slug, Subcategory $subcategory ) {
-		foreach ( $subcategory->article_reports as $article ) {
-			$pics = $article->images()->get();
-			foreach ( $pics as $pic ) {
-				Storage::disk('bsvt')->delete([$pic->image, $pic->thumbnail]);
-			}
-			$article->images()->delete();
-			$article->companies()->detach();
-			$article->countries()->detach();
-			$article->vvttypes()->detach();
-			$article->personalities()->detach();
-			$article->delete();
-		}
-		$subcategory->delete();
-
-		return redirect()->back()->with('status', 'Подраздел удален');
-
-	}
-
     public function updreportform ( $slug, Report $report ) {
 
         return view('report.updreportform', ['report' => $report]);
@@ -473,8 +531,6 @@ class ReportController extends Controller
         $report_slug = $report->types->slug;
 
 
-        $report->date_start = $request->input('start_period');
-        $report->date_end    = $request->input('end_period');
 
         if($report_slug=='weekly' || $report_slug=='monthly'){
 
@@ -494,6 +550,14 @@ class ReportController extends Controller
             ]);
             $report->title = $request->title;
         }
+
+        else $request->validate([
+            'start_period' => 'required',
+            'end_period' => 'required',
+        ]);
+
+        $report->date_start = $request->input('start_period');
+        $report->date_end    = $request->input('end_period');
 
             $report->save();
 

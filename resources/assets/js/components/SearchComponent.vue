@@ -32,6 +32,7 @@
         methods: {
             search() {
                 if (this.q.length >= 2) {
+                document.cookie = "pdfitems=; path=/;"
                     axios.post('/simply_search', {q: this.q}).then(response => {
                         this.result = response.data;
                         //console.log(response.data)
@@ -44,6 +45,7 @@
             },
             search_result() {
                 if (this.q.length >= 1) {
+
                     window.location.href = "/simply_search/" + this.q;
                 }
             }

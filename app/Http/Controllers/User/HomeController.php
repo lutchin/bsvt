@@ -56,8 +56,14 @@ class HomeController extends Controller
 
         $total_array = [];
         $i=$k=0;
+
         foreach ($report_types as $report_type) {
-            $total_array[$k][] = [$report_type->description,$report_type->slug,Report::latest('date_start')->where('type_id',$report_type->id)->active()->take(3)->get()];
+            $total_array[$k][] = [
+				$report_type->description,
+				$report_type->slug,
+				Report::latest('date_start')->where('type_id',$report_type->id)->active()->take(3)->get()
+			];
+
             $i++;
             if($i==2) {
                 $i=0;

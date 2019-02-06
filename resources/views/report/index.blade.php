@@ -33,7 +33,7 @@
                 @foreach($reports as $item)
                     <tr>
                         <td style="border: 1px solid">
-                            {{ ++$loop->index }}
+                            {{ $page?++$loop->index + ($page-1)*$count:++$loop->index}}
                         </td>
                         <td class="table_name">
                             <a href="/report/{{$report_type->slug}}/show/{{ $item['id']}}">

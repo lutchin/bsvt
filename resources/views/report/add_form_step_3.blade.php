@@ -8,7 +8,7 @@ $y = date("Y");
 @section('content')
 
     <div class="container page_create_post">
-        <form id="form" action="/analyst/{{ $report->types->slug }}/add3" method="post" enctype="multipart/form-data">
+        <form id="form" action="/report/{{ $report->types->slug }}/add3" method="post" enctype="multipart/form-data">
             <div class="row justify-content-center">
                 @if($report->types->slug == 'plannedexhibition')
                     <h3>Ежегодный календарь "Перечень международных выставок вооружений и военной техники, планируемых к проведению в иностранных государствах" на {{ date('Y', $report->date_end) }} год.</h3>

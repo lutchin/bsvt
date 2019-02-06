@@ -49,50 +49,65 @@ if(getCookie('pdfitems')) {
         else {
             var ids = [];
         }
-        console.log(ids);
+        // console.log(ids);
 
         var val = $(this).val();
         var index = ids.indexOf(val);
 
-
        // $(".pdf-checkbox input:checked").each(function() {
         if(index!=-1) {
             ids.splice(index,1);
+            if(!ids.length)  $('.show_pdf_search').prop('disabled',true);
         }
         else {
             ids.push($(this).val());
+            $('.show_pdf_search').prop('disabled',false);
         }
            // if($.inArray($(this).val(),ids)==-1)
 
        // });
-        console.log(ids);
-        setCookie('pdfitems',JSON.stringify(ids));
-        console.log(ids);
+       //  console.log(ids);
+        setCookie('pdfitems',JSON.stringify(ids),{'path':'/'});
+        // console.log(ids);
     });
 
 
-for(var i=0;i<ids.length;i++) {
-    $('.pdf-checkbox input[value='+ids[i]+']').attr('checked',true);
+if(ids) {
+    if(ids.length)
+    for(var i=0;i<ids.length;i++) {
+        $('.pdf-checkbox input[value='+ids[i]+']').attr('checked',true);
+    }
+    else
+    {
+        $('.show_pdf_search').prop('disabled',true);
+    }
 }
-
+else $('.show_pdf_search').prop('disabled',true);
 
 
 $(document).on('click','.pdf-reset',function () {
     document.cookie = 'pdfitems=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    setCookie('pdfitems',JSON.stringify([]),{'path':'/'});
+    var ids = JSON.parse(getCookie('pdfitems')); console.log(ids);
 });
-
 
 
 $(document).on('click','.show_pdf_search',function () {
 
-    ids = JSON.parse(getCookie('pdfitems'));
+    if(getCookie('pdfitems')) {
+        var ids = JSON.parse(getCookie('pdfitems'));
+    }
+    else {
+        var ids = [];
+    }
 
-    var form = document.createElement("form");
-    form.setAttribute("method", "post");
-    form.setAttribute("action", '/pdf_search');
-    form.setAttribute("target", '_blank');
+    if(ids.length) {
+        var form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", '/pdf_search');
+        form.setAttribute("target", '_blank');
 
-    for (var i in ids) {
+        for (var i in ids) {
             var input = document.createElement('input');
             input.type = 'hidden';
             input.name = 'id[]';
@@ -100,22 +115,25 @@ $(document).on('click','.show_pdf_search',function () {
             form.appendChild(input);
         }
 
-    var token = $('meta[name=csrf-token]').attr("content");
+        var token = $('meta[name=csrf-token]').attr("content");
 
-    input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = '_token';
-    input.value = token;
-    form.appendChild(input);
+        input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_token';
+        input.value = token;
+        form.appendChild(input);
 
-    input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = '_method';
-    input.value = 'POST';
-    form.appendChild(input);
+        input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_method';
+        input.value = 'POST';
+        form.appendChild(input);
 
-    document.body.appendChild(form);
-    form.submit();
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+
 
 });
 //

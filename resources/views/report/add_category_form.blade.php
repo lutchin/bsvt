@@ -54,8 +54,7 @@ switch ( $m ) {
 @section('content')
 
     <div class="container page_create_post">
-        123
-        <form id="form" action="/analyst/{{ $report->types->slug }}/addcategory" method="post" >
+        <form id="form" action="/report/{{ $report->types->slug }}/addcategory" method="post" >
             <div class="row justify-content-center">
                 <h3>Добавление региона</h3>
                 @csrf
@@ -87,7 +86,7 @@ switch ( $m ) {
             <div class="row box_save_article mt30">
               <a href="{{ URL::previous() }}" class="button butt_back">Назад</a>
               <button class="button_save butt butt_def">Сохранить</button>
-              <button onclick="jQuery('#form').attr('action','/analyst/{{ $report->types->slug }}/addcategory/1'); jQuery('#form').submit(); return false;" class="button_save butt butt_def">Сохранить и отправить на утверждение</button>
+              <button onclick="jQuery('#form').attr('action','/report/{{ $report->types->slug }}/addcategory/1'); jQuery('#form').submit(); return false;" class="button_save butt butt_def">Сохранить и отправить на утверждение</button>
             </div>
         </form>
     </div>

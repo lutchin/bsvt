@@ -66,7 +66,7 @@
 					<p class="title">{{ $categories->where('id',$cat)->first()->title}}</p>
 					@endif
 					@if( $report->types->slug == 'countrycatalog' )
-						<form action="/report/{{ $report->types->slug }}/{{ $cat}}/deleteregion" method="post">
+						<form action="/report/{{ $report->types->slug }}/deletecategory/{{ $cat}}" method="post">
 							{{ method_field('delete') }}
 							@csrf
 							<button class="butt butt_def butt_min butt_add butt_small">Удалить регион</button>
@@ -82,7 +82,7 @@
 					@endif
 
 					@if( $report->types->slug == 'yearly' && $categories->where('id',$cat)->first())
-						<form onsubmit="deleteName(this,'{{ $categories->where('id',$cat)->first()->title}}');return false;" action="/report/{{ $report->types->slug }}/{{ $cat }}/deletecategory" method="post">
+						<form onsubmit="deleteName(this,'{{ $categories->where('id',$cat)->first()->title}}');return false;" action="/report/{{ $report->types->slug }}/deletecategory/{{ $cat }}" method="post">
 							{{ method_field('delete') }}
 							@csrf
 							<button class="butt butt_def butt_min butt_add butt_small">Удалить раздел</button>
@@ -134,6 +134,8 @@
 								<a href="/report/{{ $report->types->slug }}/upd_subcategory/{{$subcat}}"><button class="butt butt_def butt_min butt_add butt_small">Редактировать подраздел</button></a>
 							@endif
 
+								@if(!empty($articles))
+
 								@foreach($articles as  $article)
 										<div class="row padl_sub2 out_list_title">
 
@@ -141,7 +143,7 @@
 												<p>{{ $article->title }}</p>
 											</a>
 
-											<form onsubmit="deleteName(this,' {{ $article->title }}');return false;" action="/report/{{ $report->types->slug }}/{{ $article->id }}/deletearticle" method="post">
+											<form onsubmit="deleteName(this,' {{ $article->title }}');return false;" action="/report/{{ $report->types->slug }}/delete_article/{{ $article->id }}" method="post">
 												{{ method_field('delete') }}
 												@csrf
 												<button  class="butt butt_def butt_min butt_add butt_small">Удалить материал</button>
@@ -159,6 +161,8 @@
 
 										</div>
 								@endforeach
+
+								@endif
 						</div>
 					@endforeach
 

@@ -1,12 +1,11 @@
 @foreach($subcats as  $subcat =>$posts)
-    @if($subcat !== 'false')
+    @if($subcat != false)
+
         <?php $n2++; ?>
         <div class="row">
             <p class="title padl_sub1 title_sub_cat">
                 {{ $n1 }}.{{ $n2 }}. {{ $subcat }}
-                <span>
-                                                <a target="_blank" href="/pdf_subcategory/{{ $report->id }}/{{ $categories->where('title',$cat)->first()->id }}/{{ $subcategories->where('title',$subcat)->first()->id }}" class="pdf"></a>
-                                            </span>
+                <span><a target="_blank" href="/pdf_subcategory/{{ $report->id }}/{{ $categories->where('title',$cat)->first()->id }}/{{ $subcategories->where('title',$subcat)->first()->id }}" class="pdf"></a></span>
             </p>
         </div>
     @endif
