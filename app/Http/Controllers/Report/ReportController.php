@@ -34,11 +34,11 @@ class ReportController extends Controller
 
 	    if( $this->role() == 'user' || $this->role() =='employee' ){
 
-		    $reports     = Report::where('type_id', $report_type->id )->active()->paginate($count);
+		    $reports     = Report::where('type_id', $report_type->id )->active()->orderBy('date_start', 'desk')->paginate($count);
 
 	    } else {
 
-		    $reports     = Report::where('type_id', $report_type->id )->paginate($count);
+		    $reports     = Report::where('type_id', $report_type->id )->orderBy('date_start', 'desk')->paginate($count);
 	    }
 
         $page = $request->page;
