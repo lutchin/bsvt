@@ -622,12 +622,35 @@ $y = date("Y");
 
         //tags
 
-        var hide_company_select_contry_id = [];
+
+
+
+//        console.log(jQuery(".out_country_select").text())
+//        console.log(hide_company_select_contry_name);
+        console.log(jQuery(".hide_company_select_contry").val());
+
         var hide_company_select_contry_name = [];
+        var hide_company_select_contry_id = [];
         var hide_company_select_vvt_id = [];
         var hide_company_select_vvt_name = [];
 
         jQuery('.company_select_country').change(function () {
+
+            if(jQuery(".out_country_select").text()) {
+                var hide_company_select_contry_name = jQuery(".out_country_select").text().split(',');
+            }
+
+            if(jQuery(".hide_company_select_contry").val()) {
+                var hide_company_select_contry_id = jQuery(".hide_company_select_contry").val().split(',');
+            }
+
+
+            console.log(hide_company_select_contry_name)
+            console.log(hide_company_select_contry_id)
+
+
+
+//            console.log(hide_company_select_contry_name);
 
             var el_id = jQuery('.company_select_country option:selected').val();
 
@@ -667,7 +690,8 @@ $y = date("Y");
 //                jQuery('.company_select_country option:first-child').attr('selected', 'selected');
 //            }, 100);
         });
-//
+
+
         jQuery('.company_select_vvt').change(function () {
 
             var el_id = jQuery(".company_select_vvt option:selected").val();
@@ -707,7 +731,9 @@ $y = date("Y");
 //            }, 100);
 //
         });
-//
+
+
+
         var hide_personalities_select_contry_id = [];
         var hide_personalities_select_contry_name = [];
         // var hide_personalities_select_vvt_id = [];
@@ -751,15 +777,15 @@ $y = date("Y");
           //  }, 100);
 //
         });
-//
-//         jQuery('.personalities_select_vvt').change(function () {
 
+//         jQuery('.personalities_select_vvt').change(function () {
+//
 //             var el_id = jQuery(".personalities_select_vvt option:selected").val();
 //             var el_name = jQuery(".personalities_select_vvt option:selected").text();
-
+//
 //             if (jQuery('.personalities_select_vvt option:selected').hasClass('active')) {
 //                 jQuery('.personalities_select_vvt option:selected').removeClass('active');
-
+//
 //                 if (hide_personalities_select_vvt_id.length) {
 //                     for (var i = 0; i < hide_personalities_select_vvt_id.length; i++) {
 //                         if (hide_personalities_select_vvt_id[i] == el_id) {
@@ -767,9 +793,9 @@ $y = date("Y");
 //                         }
 //                     }
 //                 }
-
+//
 //                 if (hide_personalities_select_vvt_name.length) {
-
+//
 //                     for (var i = 0; i < hide_personalities_select_vvt_name.length; i++) {
 //                         if (hide_personalities_select_vvt_name[i] == (" " + el_name) || hide_personalities_select_vvt_name[i] == el_name) {
 //                             hide_personalities_select_vvt_name.splice(i, 1);

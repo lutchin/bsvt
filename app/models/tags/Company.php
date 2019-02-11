@@ -17,6 +17,17 @@ class Company extends Model
         return $this->belongsToMany('App\Models\Country');
     }
 
+    public function addCountries($ids)
+    {
+        $this->countries()->detach();
+        $this->countries()->syncWithoutDetaching($ids);
+    }
+    public function addVvt($ids)
+    {
+        $this->vvttypes()->detach();
+        $this->vvttypes()->syncWithoutDetaching($ids);
+    }
+
     public function personalities () {
         return $this->belongsToMany('App\Models\Personality');
     }

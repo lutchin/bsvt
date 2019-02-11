@@ -131,7 +131,8 @@ class PersonalitiesController extends Controller
     public function update ( Request $request, $id )
     {
 	    $tag = Personality::find($id);
-	    $tag->title = $request->title;
+		$tag->title = $request->data['title'];
+		$tag->addCountries($request->data['countries']);
 	    $tag->save();
     }
 

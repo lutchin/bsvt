@@ -56,24 +56,37 @@ class IndexController extends Controller
     }
 
     public function filtertags ( Request $request ) {
-        $countries   = Country::orderBy('title')->get();
-        $country_id  = $request->input('countries');
-        $vvt_type_id = $request->input('vvt_type');
 
-        $companies     = Company::orderBy('title')->get();
-        $personalities = Personality::orderBy('title')->get();
+        if(isset($request->tag) && !empty($request->tag))  {
+            if($request->name_tag=='company'){
+                $countries = Company::find($request->tag)->countries->pluck('id','title')->toArray();
+                $vvt = Company::find($request->tag)->vvttypes->pluck('id','title')->toArray();
+            }
+            if($request->name_tag=='personalities'){
+                $countries = Personality::find($request->tag)->countries->pluck('id','title')->toArray();
+            }
+            
+            return compact('countries','vvt');
+        }
+            else {
+                $countries   = Country::orderBy('title')->get();
+                $country_id  = $request->input('countries');
+                $vvt_type_id = $request->input('vvt_type');
 
-        if ( isset($country_id) && !empty($country_id) ) {
-            if ( is_array($country_id) ) {
+                $companies     = Company::orderBy('title')->get();
+                $personalities = Personality::orderBy('title')->get();
 
-	            $companies = collect();
-	            $personalities = collect();
+                if ( isset($country_id) && !empty($country_id) ) {
+                    if ( is_array($country_id) ) {
 
-	            foreach($country_id as $country) {
+                        $companies = collect();
+                        $personalities = collect();
 
-		            $companies = $companies->merge(Country::find( $country )->companies()->get())->unique('id');
+                        foreach($country_id as $country) {
 
-	            }
+                            $companies = $companies->merge(Country::find( $country )->companies()->get())->unique('id');
+
+                        }
 
 //                $companies     = Company::join('company_country', 'companies.id', '=', 'company_country.company_id')
 //                                        ->join('countries', 'countries.id', '=', 'company_country.country_id')
@@ -81,17 +94,17 @@ class IndexController extends Controller
 //                                        ->select('companies.*')
 //                                        ->get();
 
-	            foreach($country_id as $country) {
+                        foreach($country_id as $country) {
 
-		            $personalities = $personalities->merge(Country::find( $country )->personalities()->get())->unique('id');
+                            $personalities = $personalities->merge(Country::find( $country )->personalities()->get())->unique('id');
 
-	            }
+                        }
 //                $personalities = Personality::join('country_personality', 'personalities.id', '=', 'country_personality.personality_id')
 //                                            ->join('countries', 'countries.id', '=', 'country_personality.country_id')
 //                                            ->whereIn('countries.id', $country_id)
 //                                            ->select('personalities.*')
 //                                            ->get();
-            }
+                    }
 //            else {
 //
 //                $companies     = Company::join('company_country', 'companies.id', '=', 'company_country.company_id')
@@ -105,29 +118,29 @@ class IndexController extends Controller
 //                                            ->select('personalities.*')
 //                                            ->get();
 //            }
-        }
+                }
 
-        if ( isset($vvt_type_id) && !empty($vvt_type_id) ) {
-	        if ( is_array( $vvt_type_id ) ) {
+                if ( isset($vvt_type_id) && !empty($vvt_type_id) ) {
+                    if ( is_array( $vvt_type_id ) ) {
 
-		        $vvts = collect();
-		        foreach ( $companies as $company ) {
+                        $vvts = collect();
+                        foreach ( $companies as $company ) {
 
-			        $vvts = $vvts->merge( $company->vvttypes()->get());
-
-
-		        }
+                            $vvts = $vvts->merge( $company->vvttypes()->get());
 
 
-		        $companies = collect();
-		        foreach ( $vvt_type_id as $vvt_type ) {
-			        foreach ( $vvts as $vvt ) {
-				        if ( $vvt->pivot->vvt_type_id == $vvt_type ) {
-					        $companies = $companies->merge([$vvt->pivot->pivotParent])->unique('id');
-				        }
+                        }
 
-			        }
-		        }
+
+                        $companies = collect();
+                        foreach ( $vvt_type_id as $vvt_type ) {
+                            foreach ( $vvts as $vvt ) {
+                                if ( $vvt->pivot->vvt_type_id == $vvt_type ) {
+                                    $companies = $companies->merge([$vvt->pivot->pivotParent])->unique('id');
+                                }
+
+                            }
+                        }
 
 
 //                $companies     = Company::join('company_vvt_type', 'companies.id', '=', 'company_vvt_type.company_id')
@@ -135,23 +148,23 @@ class IndexController extends Controller
 //                                        ->whereIn('vvt_types.id', $vvt_type_id)
 //                                        ->select('companies.*')
 //                                        ->get();
-		        $vvts = collect();
-		        foreach ( $personalities as $personality ) {
+                        $vvts = collect();
+                        foreach ( $personalities as $personality ) {
 
-			        $vvts = $vvts->merge( $personality->vvttypes()->get());
+                            $vvts = $vvts->merge( $personality->vvttypes()->get());
 
 
-		        }
+                        }
 
-		        //$personalities = collect();
-		        foreach ( $vvt_type_id as $vvt_type ) {
-			        foreach ( $vvts as $vvt ) {
-				        if ( $vvt->pivot->vvt_type_id == $vvt_type ) {
-					        $personalities = $personalities->merge([$vvt->pivot->pivotParent])->unique('id');
-				        }
-			        }
-		        }
-		       // dd($personalities);
+                        //$personalities = collect();
+                        foreach ( $vvt_type_id as $vvt_type ) {
+                            foreach ( $vvts as $vvt ) {
+                                if ( $vvt->pivot->vvt_type_id == $vvt_type ) {
+                                    $personalities = $personalities->merge([$vvt->pivot->pivotParent])->unique('id');
+                                }
+                            }
+                        }
+                        // dd($personalities);
 //		        foreach ( $vvt_type_id as $vvt_type ) {
 //
 //			        $personalities = $personalities->merge( VvtType::find( $vvt_type )->personalities()->get() )->unique( 'id' );
@@ -163,7 +176,7 @@ class IndexController extends Controller
 //                                            ->whereIn('vvt_types.id', $vvt_type_id)
 //                                            ->select('personalities.*')
 //                                            ->get();
-	        }
+                    }
 //            else {
 //
 //                $companies     = Company::join('company_vvt_type', 'companies.id', '=', 'company_vvt_type.company_id')
@@ -179,11 +192,15 @@ class IndexController extends Controller
 //            }
 
 
-        }
+                }
 
-        $vvt_types = VvtType::orderBy('title')->get();
+                $vvt_types = VvtType::orderBy('title')->get();
 
-        return compact('countries', 'companies', 'vvt_types', 'personalities', 'country_id');
+                $country_id_array = Country::select(['id','title'])->get()->keyBy('id');
+                $vvt_id_array = VvtType::select(['id','title'])->get()->keyBy('id');
+
+                return compact('countries', 'companies', 'vvt_types', 'personalities', 'country_id','country_id_array','vvt_id_array');
+            }
     }
 
 }

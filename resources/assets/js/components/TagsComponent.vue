@@ -106,6 +106,7 @@
                 <div class="popup_tag_form_box">
 
                     <input name="tag" placeholder="Введите название компании" v-model="addcompany"/>
+
                     <div class="select_wrap">
                         <select name="company_select_country" v-model="attachcountrytocompany" @change="pushcountrytocompany()" class="company_select_country">
                             <option value="" disabled selected>--Страна--</option>
@@ -185,6 +186,26 @@
             <div class="popup_form" style="display: none;">
                 <h4 class="mb10">Исправьте тег</h4>
                 <input class="title_tag" name="title_tag" value="">
+
+                                    <div class="select_wrap">
+                                        <select name="company_select_country" v-model="tocountries" @change="pushtocountryupdate()" class="company_select_country_edit">
+                                            <option value="" disabled selected>--Страна--</option>
+                                            <option v-for="country in countries" :value="country.id">{{country.title}}</option>
+                                        </select>
+                                    </div>
+
+                                    <div v-if="name_tag == 'company'" class="select_wrap">
+                                        <select name="company_select_vvt" v-model="tovvt" @change="pushtovvtupdate()" class="company_select_vvt_edit">
+                                            <option value="" disabled selected>--Тип ВВТ--</option>
+                                            <option v-for="vvt_type in vvt_types" :value="vvt_type.id">{{vvt_type.title}}</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb10 d-flex flex-column justify-content-center">
+                                        <span class="out_country_select_edit pl20"></span>
+                                        <span v-if="name_tag == 'company'" class="out_vvt_select_edit pl20"></span>
+                                    </div>
+
                 <div class="box_save_article">
                     <input class="name_tag" type="hidden" name="name_tag" data-name="">
                     <input class="value_tag" type="hidden" name="value_tag" data-value="">
@@ -193,9 +214,7 @@
             </div>
 
         </div>
-
     </div>
-
 </template>
 
 <script>
@@ -217,12 +236,22 @@
                 countryarraytocompany: [],
                 addvvt: '',
                 addperson: '',
+
+
                 attachcountrytopersona: [],
                 countryarraytopersona: [],
                 vvtarraytopersona: [],
                 attachvvttopersona: [],
                 vvtarraytocompany: [],
                 attachvvttocompany: [],
+
+                tocountries:[],
+                tovvt:[],
+
+                country_id_array:[],
+                vvt_id_array:[],
+
+                name_tag:''
             }
         },
         mounted() {
@@ -242,6 +271,8 @@
                     this.companies = response.data.companies;
                     this.vvt_types = response.data.vvt_types;
                     this.personalities = response.data.personalities;
+                    this.country_id_array = response.data.country_id_array;
+                    this.vvt_id_array = response.data.vvt_id_array;
                 })
             },
             storecompany() {
@@ -418,6 +449,8 @@
 
                 })
             },
+
+
             pushcountrytopersona() {
 
                 var index = -1;
@@ -474,6 +507,58 @@
                 console.log("arrary: " + this.countryarraytocompany);
 
             },
+
+            pushtocountryupdate() {
+
+                var index = -1;
+                if (this.countryarraytocompany.length) {
+                    index = this.countryarraytocompany.indexOf(this.tocountries);
+                }
+                if (index >= 0) {
+                    this.countryarraytocompany.splice(index, 1);
+                    jQuery('.company_select_country_edit option[value='+this.tocountries+']').removeClass('active');
+                } else {
+                    this.countryarraytocompany.push(this.tocountries);
+                    jQuery('.company_select_country_edit option[value='+this.tocountries+']').addClass('active');
+                }
+
+                var company_name = [];
+
+                for(var key in this.countryarraytocompany) {
+                    var country_id = this.countryarraytocompany[key];
+                    company_name.push(" "+this.country_id_array[country_id].title);
+                }
+
+                jQuery(".out_country_select_edit").text(company_name);
+                console.log("arrary country: " + this.countryarraytocompany);
+
+            },
+
+            pushtovvtupdate() {
+
+                var index = -1;
+                if (this.vvtarraytocompany.length) {
+                    index = this.vvtarraytocompany.indexOf(this.tovvt);
+                }
+                if (index >= 0) {
+                    this.vvtarraytocompany.splice(index, 1);
+                    jQuery('.company_select_vvt_edit option[value='+this.tovvt+']').removeClass('active');
+                } else {
+                    this.vvtarraytocompany.push(this.tovvt);
+                    jQuery('.company_select_vvt_edit option[value='+this.tovvt+']').addClass('active');
+                }
+
+                var vvt_name = [];
+
+                for(var key in this.vvtarraytocompany) {
+                    var vvt_id = this.vvtarraytocompany[key];
+                    vvt_name.push(" "+this.vvt_id_array[vvt_id].title);
+                }
+                jQuery(".out_vvt_select_edit").text(vvt_name);
+                console.log("arrary vvt: " + this.vvtarraytocompany);
+
+            },
+
             del_tag(value, name_tag, text) {
 
                 jQuery('.name_tag').attr('data-name', name_tag);
@@ -484,11 +569,66 @@
                 jQuery('.deltag_text_out').text(text);
 
             },
+
             edit_tag(value, name_tag, title) {
 
-                jQuery('.name_tag').attr('data-name', name_tag);
-                jQuery('.value_tag').attr('data-value', value);
+                this.countryarraytocompany = [];
+                this.vvtarraytocompany = [];
 
+                jQuery('.company_select_country_edit option').removeClass('active');
+                jQuery('.company_select_vvt_edit option').removeClass('active');
+
+                axios.post('/tags', {tag: value,name_tag:name_tag}).then(response => {
+
+                    console.log(response.data);
+
+                    var company_name = [];
+                    var vvt_name = [];
+
+                    for(var key in response.data.countries) {
+                        console.log(response.data.countries[key]);
+                        jQuery('.company_select_country_edit option[value='+response.data.countries[key]+']').addClass('active');
+
+                            company_name.push(" " + key);
+
+                            var index = -1;
+                            if (this.countryarraytocompany.length) {
+                                index = this.countryarraytocompany.indexOf(response.data.countries[key]);
+                            }
+                            if (index >= 0) {
+                                this.countryarraytocompany.splice(index, 1);
+                            } else {
+                                this.countryarraytocompany.push(response.data.countries[key]);
+                            }
+                    }
+                    jQuery(".out_country_select_edit").text(company_name);
+
+                    if(name_tag=='company') {
+                        for(var key in response.data.vvt) {
+
+                            jQuery('.company_select_vvt_edit option[value='+response.data.vvt[key]+']').addClass('active');
+
+                            vvt_name.push(" " + key);
+
+                            var index = -1;
+                            if (this.vvtarraytocompany.length) {
+                                index = this.vvtarraytocompany.indexOf(response.data.vvt[key]);
+                            }
+                            if (index >= 0) {
+                                this.vvtarraytocompany.splice(index, 1);
+                            } else {
+                                this.vvtarraytocompany.push(response.data.vvt[key]);
+
+                            }
+                        }
+                        jQuery(".out_vvt_select_edit").text(vvt_name);
+                    }
+
+                })
+
+                this.value = value;
+                this.name_tag = name_tag;
+                this.title = title;
 
                 jQuery('.popup_edittag').fadeIn(250);
                 jQuery('.popup_edittag .popup_form').show(500);
@@ -496,6 +636,7 @@
                // jQuery('.edittag_text_out').text(title);
 
             },
+
             dellTagContinue() {
                 var name_tag = jQuery('.name_tag').attr('data-name');
                 var value = jQuery('.value_tag').attr('data-value');
@@ -514,25 +655,29 @@
                 jQuery('.name_tag').attr('data-name', '');
                 jQuery('.value_tag').attr('data-value', '');
             },
-            editTagContinue() {
-                var name_tag = jQuery('.name_tag').attr('data-name');
-                var value = jQuery('.value_tag').attr('data-value');
-                var title = jQuery('.title_tag').val();
 
-                axios.put('/' + name_tag + '/' + value, {title} ).then(response => {
+            editTagContinue() {
+
+                var data = {
+                    title: this.title,
+                    countries: this.countryarraytocompany,
+                    vvt_tag: this.vvtarraytocompany,
+                };
+
+                console.log(data);
+
+                axios.put('/' + this.name_tag + '/' + this.value, {data} ).then(response => {
                     this.checkboxfilter();
                     jQuery('.popup_alert').fadeIn(250);
                     jQuery('.popup_alert .popup_form').show(500);
                     jQuery('.alert_text_out').html('<p>Поисковая метка отредактирована!</p>');
                 })
 
-                //jQuery('.edittag_text_out').text('');
                 jQuery('.popup_edittag .popup_form').hide(500);
                 jQuery('.popup_edittag').fadeOut(250);
 
-                jQuery('.name_tag').attr('data-name', '');
-                jQuery('.value_tag').attr('data-value', '');
             },
+
             dellTagClose() {
 
                 jQuery('.deltag_text_out').text('');

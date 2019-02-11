@@ -20,4 +20,10 @@ class Personality extends Model
     public function vvttypes () {
         return $this->belongsToMany('App\Models\VvtType');
     }
+    
+    public function addCountries($ids)
+    {
+        $this->countries()->detach();
+        $this->countries()->syncWithoutDetaching($ids);
+    }
 }

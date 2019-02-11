@@ -129,7 +129,9 @@ class CompanyController extends Controller
     public function update ( Request $request, $id )
     {
 	    $tag = Company::find($id);
-	    $tag->title = $request->title;
+	    $tag->title = $request->data['title'];
+		$tag->addCountries($request->data['countries']);
+		$tag->addVvt($request->data['vvt_tag']);
 	    $tag->save();
     }
 
