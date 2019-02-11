@@ -77,7 +77,7 @@ class CountryController extends Controller
     public function update(Request $request, $id)
     {
 	    $tag = Country::find($id);
-	    $tag->title = $request->title;
+	    $tag->title = $request->data['title'];
 	    $tag->save();
     }
 

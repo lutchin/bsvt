@@ -79,7 +79,7 @@ class VvttypesController extends Controller
     public function update(Request $request, $id)
     {
 	    $tag = VvtType::find($id);
-	    $tag->title = $request->title;
+	    $tag->title = $request->data['title'];
 	    $tag->save();
     }
 

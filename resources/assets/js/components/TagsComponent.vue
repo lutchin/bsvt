@@ -95,7 +95,7 @@
 
         </div>
 
-        <!--  company tag  -->
+        <!--add tag -->
         <div class="popup_tag popup_tag_company" style="display: none;">
             <div class="bg_popup_tag"></div>
 
@@ -138,30 +138,30 @@
         </div>
 
         <!-- personalities -->
-        <div class="popup_tag popup_tag_personalities" style="display: none;">
-            <div class="bg_popup_tag"></div>
-            <div class="popup_tag_form">
-                <div class="close_tag">x</div>
-                <h4 class="mb30">Добавить <span>поисковую метку</span></h4>
-                <div class="popup_tag_form_box">
-                    <input name="tag" placeholder="Введите название персоналии" v-model="addperson"/>
-                    <div class="select_wrap">
-                        <select name="personalities_select_country" @change="pushcountrytopersona()"v-model="attachcountrytopersona" class="personalities_select_country">
-                            <option value="" disabled>--Страна--</option>
-                            <option v-for="country in countries" :value="country.id">{{country.title}}</option>
-                        </select>
-                    </div>
-                    <div class="mb10 d-flex flex-column justify-content-center">
-                        <span class="out_personalities_country_select pl20"></span>
-                        <input class="hide_personalities_select_country" type="hidden" name="country_for_tag[]">
-                        <br>
-                    </div>
-                </div>
-                <a class="butt_save butt_add_tag" href="#">
-                    <button @click="storeperonality()">Сохранить тег</button>
-                </a>
-            </div>
-        </div>
+        <!--<div class="popup_tag popup_tag_personalities" style="display: none;">-->
+            <!--<div class="bg_popup_tag"></div>-->
+            <!--<div class="popup_tag_form">-->
+                <!--<div class="close_tag">x</div>-->
+                <!--<h4 class="mb30">Добавить <span>поисковую метку</span></h4>-->
+                <!--<div class="popup_tag_form_box">-->
+                    <!--<input name="tag" placeholder="Введите название персоналии" v-model="addperson"/>-->
+                    <!--<div class="select_wrap">-->
+                        <!--<select name="personalities_select_country" @change="pushcountrytopersona()"v-model="attachcountrytopersona" class="personalities_select_country">-->
+                            <!--<option value="" disabled>&#45;&#45;Страна&#45;&#45;</option>-->
+                            <!--<option v-for="country in countries" :value="country.id">{{country.title}}</option>-->
+                        <!--</select>-->
+                    <!--</div>-->
+                    <!--<div class="mb10 d-flex flex-column justify-content-center">-->
+                        <!--<span class="out_personalities_country_select pl20"></span>-->
+                        <!--<input class="hide_personalities_select_country" type="hidden" name="country_for_tag[]">-->
+                        <!--<br>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<a class="butt_save butt_add_tag" href="#">-->
+                    <!--<button @click="storeperonality()">Сохранить тег</button>-->
+                <!--</a>-->
+            <!--</div>-->
+        <!--</div>-->
 
         <!-- deltag modal -->
         <div class="popup popup_deltag" style="display: none;">
@@ -187,7 +187,7 @@
                 <h4 class="mb10">Исправьте тег</h4>
                 <input class="title_tag" name="title_tag" value="">
 
-                                    <div class="select_wrap">
+                                    <div v-if="name_tag == 'company' || name_tag == 'personalities'" class="select_wrap">
                                         <select name="company_select_country" v-model="tocountries" @change="pushtocountryupdate()" class="company_select_country_edit">
                                             <option value="" disabled selected>--Страна--</option>
                                             <option v-for="country in countries" :value="country.id">{{country.title}}</option>
@@ -275,62 +275,7 @@
                     this.vvt_id_array = response.data.vvt_id_array;
                 })
             },
-            storecompany() {
-                jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').text('');
 
-                var is_tag = 0;
-                var title = this.addcompany;
-                this.companies.forEach(function (company) {
-                    if (company.title == title) {
-                        is_tag++;
-                    }
-                });
-
-                if(this.selectedtags != undefined) {
-
-                    var $data = {
-                        title: this.addcompany,
-                        countries: this.countryarraytocompany,
-                        vvt_tag: this.vvtarraytocompany,
-                        article : this.selectedtags.article,
-                        report : this.selectedtags.report,
-                    } ;
-
-                } else {
-
-                    var $data = {
-                        title: this.addcompany,
-                        countries: this.countryarraytocompany,
-                        vvt_tag: this.vvtarraytocompany,
-                    } ;
-                }
-
-                if (is_tag == 0) {
-                    axios.post('/company', $data).then(response => {
-                        this.selcompanies = response.data;
-                        this.checkboxfilter();
-
-                    });
-
-                    this.addcompany = '';
-                    this.attachcountrytocompany = [];
-                    this.countryarraytocompany = [];
-                    this.attachvvttopersona = [];
-                    this.vvtarraytopersona = [];
-                    this.attachvvttocompany = [];
-                    this.vvtarraytocompany = [];
-                    this.article = '';
-                    this.report = '';
-
-                    jQuery('.close_tag').click();
-                } else {
-                    if (jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').length) {
-                        jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').text('Тег уже существует');
-                    } else {
-                        jQuery('.popup_tag_company .popup_tag_form_box').append('<p class="mess_er_tag mb30">Тег уже существует</p>');
-                    }
-                }
-            },
             storecountry(e) {
                 //e.preventDefault();
                 jQuery('.popup_tag_country .popup_tag_form_box .mess_er_tag').text('');
@@ -387,6 +332,63 @@
                 }
 
             },
+
+            storecompany() {
+                jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').text('');
+
+                var is_tag = 0;
+                var title = this.addcompany;
+                this.companies.forEach(function (company) {
+                    if (company.title == title) {
+                        is_tag++;
+                    }
+                });
+
+                if(this.selectedtags != undefined) {
+
+                    var $data = {
+                        title: this.addcompany,
+                        countries: this.countryarraytocompany,
+                        vvt_tag: this.vvtarraytocompany,
+                        article : this.selectedtags.article,
+                        report : this.selectedtags.report,
+                    } ;
+
+                } else {
+
+                    var $data = {
+                        title: this.addcompany,
+                        countries: this.countryarraytocompany,
+                        vvt_tag: this.vvtarraytocompany,
+                    } ;
+                }
+
+                if (is_tag == 0) {
+                    axios.post('/company', $data).then(response => {
+                        this.selcompanies = response.data;
+                    this.checkboxfilter();
+
+                });
+
+                    this.addcompany = '';
+                    this.attachcountrytocompany = [];
+                    this.countryarraytocompany = [];
+                    this.attachvvttopersona = [];
+                    this.vvtarraytopersona = [];
+                    this.attachvvttocompany = [];
+                    this.vvtarraytocompany = [];
+                    this.article = '';
+                    this.report = '';
+
+                    jQuery('.close_tag').click();
+                } else {
+                    if (jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').length) {
+                        jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').text('Тег уже существует');
+                    } else {
+                        jQuery('.popup_tag_company .popup_tag_form_box').append('<p class="mess_er_tag mb30">Тег уже существует</p>');
+                    }
+                }
+            },
             storeperonality(e) {
                 //e.preventDefault();
                 jQuery('.popup_tag_personalities .popup_tag_form_box .mess_er_tag').text('');
@@ -440,6 +442,7 @@
                     }
                 }
             },
+
             gettags() {
                 axios.get('/tags').then(response => {
                     this.countries = response.data.countries;
@@ -449,7 +452,6 @@
 
                 })
             },
-
 
             pushcountrytopersona() {
 
@@ -508,6 +510,7 @@
 
             },
 
+
             pushtocountryupdate() {
 
                 var index = -1;
@@ -533,7 +536,6 @@
                 console.log("arrary country: " + this.countryarraytocompany);
 
             },
-
             pushtovvtupdate() {
 
                 var index = -1;
@@ -572,15 +574,17 @@
 
             edit_tag(value, name_tag, title) {
 
+                $('.title_tag').val(title);
+
                 this.countryarraytocompany = [];
                 this.vvtarraytocompany = [];
+
+//                console.log(name_tag);
 
                 jQuery('.company_select_country_edit option').removeClass('active');
                 jQuery('.company_select_vvt_edit option').removeClass('active');
 
                 axios.post('/tags', {tag: value,name_tag:name_tag}).then(response => {
-
-                    console.log(response.data);
 
                     var company_name = [];
                     var vvt_name = [];
@@ -659,7 +663,7 @@
             editTagContinue() {
 
                 var data = {
-                    title: this.title,
+                    title: $('.title_tag').val(),
                     countries: this.countryarraytocompany,
                     vvt_tag: this.vvtarraytocompany,
                 };
