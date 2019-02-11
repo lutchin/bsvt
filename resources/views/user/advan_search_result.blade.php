@@ -83,7 +83,7 @@
                         <strong>Отчет: </strong> <a class="report" href="/report/{{ $item->reports->types->slug }}/show/{{$item->report_id}}"
                                                     target="_blank">Еженедельный дайжест "Еженедельный обзор ВПО и ВТИ" за период от {{date("d.m.Y",$item->reports->date_start)}} по {{date("d.m.Y",$item->reports->date_end)}}</a>
                     </p>
-                    @if($item->category_id !== 0)<p><strong>Раздел: </strong> {{\App\Category::find($item->category_id)->title}}</p>@endif
+                    @if($item->category_id != 0)<p><strong>Раздел: </strong> {{\App\Category::find($item->category_id)->title}}</p>@endif
                     @if(isset($item->subcategory_id))
                         <p><strong>Позраздел:</strong> {{\App\Subcategory::find($item->subcategory_id)->title}}</p>
                     @endif
