@@ -13,6 +13,7 @@
         @if(isset($post))
             <?php $n3++; ?>
             <div class="row padl_sub2 out_list_title">
+                <div class="search_block">
                 <p class="pdf_box">
                 <span>
                 <a href="/report/{{ $report->types->slug }}/article/{{ $post->id }}">
@@ -23,6 +24,9 @@
                                             <span>
                                                 <a target="_blank" href="/pdf_article/{{ $post->id }}" class="pdf"></a>
                                             </span>
+                <label class="pdf-checkbox">
+                    <input type="checkbox" value="{{$post->id}}"><span class="pdf"></span>
+                </label>
                 <?php
                 $description = explode(' ', ltrim(html_entity_decode(strip_tags($post->description))));
                 count($description) <40 ? $count = count($description): $count = 40;
@@ -40,6 +44,7 @@
                         <p class="status st-line st-2">| Утверждено</p>
                     @endif
                 @endif
+                </div>
             </div>
         @endif
     @endforeach

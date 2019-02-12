@@ -15,7 +15,8 @@
         "laravel/tinker": "^1.0",
         "nicolaslopezj/searchable": "1.*",
         "niklasravnsborg/laravel-pdf": "^2.0",
-        "pragmarx/tracker": "^3.3"
+        "pragmarx/tracker": "^3.3",
+        "elasticquent/elasticquent": "dev-master"
     },
     "require-dev": {
         "filp/whoops": "^2.0",
