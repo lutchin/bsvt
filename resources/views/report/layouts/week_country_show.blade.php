@@ -27,6 +27,7 @@
     @foreach($subcats as  $posts)
         @foreach($posts as $post)
         <div class="row @if($report->types->slug=='various') padl_sub2  @else padl_sub1 @endif out_list_title">
+            <div class="search_block">
             <p class="pdf_box">
 
                 <a href="/report/{{$report->types->slug}}/article/{{ $post->id }}">
@@ -34,6 +35,9 @@
                     {{ $post->title }}
                     </span>
                 </a>
+                <label class="pdf-checkbox">
+                    <input type="checkbox" value="{{$post->id}}"><span class="pdf"></span>
+                </label>
 
                 <a target="_blank" href="/pdf_article/{{ $post->id }}" class="pdf"></a>
 
@@ -55,6 +59,8 @@
                     @endif
                 @endif
             </p>
+            </div>
+
         </div>
         @endforeach
     @endforeach

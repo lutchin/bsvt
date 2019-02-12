@@ -37,7 +37,7 @@ Route::middleware('checkuser')->group(function()
     Route::get('/search/form', 'User\HomeController@advanced_search_form');
 	Route::get('/search', 'User\HomeController@advanced_search');
     Route::post('/search', 'User\HomeController@advanced_search');
-    Route::get('/simply_search/{q}', 'User\HomeController@search');
+    Route::get('/simply_search', 'User\HomeController@search');
 	Route::post('/simply_search', 'User\HomeController@search');
 	Route::get('/migrate', 'Migrate\MigrateController@migrate');
 	Route::get('/migrate_one', 'Migrate\MigrateController@migrate_one');
@@ -103,6 +103,7 @@ Route::middleware('checkanalyst')->prefix('/report/{slug}')->group(function()
 	Route::put('/upd_category/{category}', 'Report\ReportController@update_category');
 	Route::get('/upd_subcategory/{subcategory}', 'Report\ReportController@upd_form_subcategory');
 	Route::put('/upd_subcategory/{subcategory}', 'Report\ReportController@update_subcategory');
+	Route::delete('{article}/deletearticle', 'Report\ReportController@delete_article');
 
 });
 
@@ -130,6 +131,10 @@ Route::middleware('checkadmin')->group(function()
     Route::get('/stats/users/{user}', 'Admin\AdminController@users');
     Route::get('/stats/routes/', 'Admin\AdminController@count_visits');
     Route::get('/stats/routes/{route}', 'Admin\AdminController@count_visits_byroutes');
+
+    /*ElasticIndex*/
+	Route::get('/index', 'User\HomeController@indexes');
+
 
 });
 

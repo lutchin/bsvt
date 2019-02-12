@@ -38,38 +38,44 @@ function setCookie(name, value, options) {
     document.cookie = updatedCookie;
 }
 
+let drop_cookie = document.getElementById('drop_cookie');
+if (drop_cookie) {
+    setCookie('pdfitems',JSON.stringify([]),{'path':'/'});
+}
+
 if(getCookie('pdfitems')) {
     var ids = JSON.parse(getCookie('pdfitems'));
 }
 
-    $(document).on('click','.pdf-checkbox input', function (eo) {
-        if(getCookie('pdfitems')) {
-            var ids = JSON.parse(getCookie('pdfitems'));
-        }
-        else {
-            var ids = [];
-        }
-        // console.log(ids);
 
-        var val = $(this).val();
-        var index = ids.indexOf(val);
+$(document).on('click','.pdf-checkbox input', function (eo) {
+    if(getCookie('pdfitems')) {
+        var ids = JSON.parse(getCookie('pdfitems'));
+    }
+    else {
+        var ids = [];
+    }
+    // console.log(ids);
 
-       // $(".pdf-checkbox input:checked").each(function() {
-        if(index!=-1) {
-            ids.splice(index,1);
-            if(!ids.length)  $('.show_pdf_search').prop('disabled',true);
-        }
-        else {
-            ids.push($(this).val());
-            $('.show_pdf_search').prop('disabled',false);
-        }
-           // if($.inArray($(this).val(),ids)==-1)
+    var val = $(this).val();
+    var index = ids.indexOf(val);
 
-       // });
-       //  console.log(ids);
-        setCookie('pdfitems',JSON.stringify(ids),{'path':'/'});
-        // console.log(ids);
-    });
+   // $(".pdf-checkbox input:checked").each(function() {
+    if(index!=-1) {
+        ids.splice(index,1);
+        if(!ids.length)  $('.show_pdf_search').prop('disabled',true);
+    }
+    else {
+        ids.push($(this).val());
+        $('.show_pdf_search').prop('disabled',false);
+    }
+       // if($.inArray($(this).val(),ids)==-1)
+
+   // });
+   //  console.log(ids);
+    setCookie('pdfitems',JSON.stringify(ids),{'path':'/'});
+    // console.log(ids);
+});
 
 
 if(ids) {
@@ -88,7 +94,7 @@ else $('.show_pdf_search').prop('disabled',true);
 $(document).on('click','.pdf-reset',function () {
     document.cookie = 'pdfitems=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     setCookie('pdfitems',JSON.stringify([]),{'path':'/'});
-    var ids = JSON.parse(getCookie('pdfitems')); console.log(ids);
+    var ids = JSON.parse(getCookie('pdfitems'));
 });
 
 

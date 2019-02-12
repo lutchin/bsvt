@@ -78,6 +78,7 @@ $y = date("Y");
                 @if( $role != 'user' && $role !='employee' )
                     <a class="button butt_def" href="/report/{{$report->types->slug}}/add2/{{ $report->id }}">Редактировать</a>
                 @endif
+                    <button id="drop_cookie" class="button butt_def show_pdf_search">Показать в PDF</button>
             </div>
     </div>
 @endsection
