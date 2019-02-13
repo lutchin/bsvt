@@ -146,6 +146,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+	    Elasticquent\ElasticquentServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -214,6 +215,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'PDF' => niklasravnsborg\LaravelPdf\Facades\Pdf::class,
         'Tracker' => PragmaRX\Tracker\Vendor\Laravel\Facade::class,
+        'Es' => Elasticquent\ElasticquentElasticsearchFacade::class,
 
     ],
 

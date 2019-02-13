@@ -21,7 +21,7 @@ class ReportController extends Controller
 
     public function __construct () {
         $this->middleware('auth');
-       // $this->reports(); //problem
+        $this->reports(); //problem
 
     }
 
@@ -140,6 +140,8 @@ class ReportController extends Controller
             $article->personalities()->detach();
 			
             $article->delete();
+	        $article->removeFromIndex();
+
         }
         $report->delete();
 
@@ -155,6 +157,8 @@ class ReportController extends Controller
         $article->personalities()->detach();
         $article->companies()->detach();
         $article->delete();
+        $article->removeFromIndex();
+
 
         return redirect()->back()->with('status', 'Материал удален');
     }
@@ -171,6 +175,7 @@ class ReportController extends Controller
             $article->vvttypes()->detach();
             $article->personalities()->detach();
             $article->delete();
+	        $article->removeFromIndex();
         }
         $subcategory->delete();
 
@@ -195,6 +200,8 @@ class ReportController extends Controller
             $article->personalities()->detach();
 			
             $article->delete();
+	        $article->removeFromIndex();
+
         }
         $category->delete();
 
@@ -478,13 +485,13 @@ class ReportController extends Controller
         if(isset($subcategory)){
 
 	        $subcategory = Subcategory::find($subcategory);
-	        $article->subcategory()->associate($subcategory);
+	        $article->subcategory_id = $subcategory->id;
             $category = Category::find($category);
-            $article->category()->associate($category);
+	        $article->category_id = $category->id;
 
         } else {
 	        $category = Category::find($category);
-	        $article->category()->associate($category);
+	        $article->category_id = $category->id;
         }
 
         $article->save();
@@ -492,6 +499,7 @@ class ReportController extends Controller
         $article->personalities()->sync($personalities);
         $article->vvttypes()->sync($vvt_types);
 	    $article->countries()->sync($countries);
+	    $article->addToIndex();
 
 
         if ( $request->hasFile('pic') ) {
@@ -629,6 +637,7 @@ class ReportController extends Controller
         $article->companies()->sync($companies);
         $article->personalities()->sync($personalities);
         $article->vvttypes()->sync($vvt_types);
+        $article->updateIndex();
 		
 		$pics = $article->images()->get();//++
         foreach ( $pics as $pic ) {

@@ -6,18 +6,6 @@ use App\Category;
 use App\Report;
 use App\ArticleReports;
 use App\Http\Controllers\Controller;
-use App\models\analyst\exhibitions\Plannedexhibition;
-use App\models\analyst\exhibitions\Plannedexhibitionyear;
-use App\models\analyst\monthly\Monthlyarticle;
-use App\models\analyst\monthly\Monthlyreport;
-use App\models\analyst\various\Variousarticle;
-use App\models\analyst\various\Variousreport;
-use App\models\analyst\weekly\Weeklyarticle;
-use App\models\analyst\weekly\Weeklyreport;
-use App\models\analyst\yearly\Countrycatalog;
-use App\models\analyst\yearly\InfoCountry;
-use App\models\analyst\yearly\Yearlyarticle;
-use App\models\analyst\yearly\Yearlyreport;
 use App\Models\Company;
 use App\Models\Country;
 use App\Models\Personality;
@@ -58,17 +46,18 @@ class HomeController extends Controller
         $i=$k=0;
 
         foreach ($report_types as $report_type) {
+
             $total_array[$k][] = [
-				$report_type->description,
-				$report_type->slug,
-				Report::latest('date_start')->where('type_id',$report_type->id)->active()->take(3)->get()
-			];
+            	$report_type->description,$report_type->slug,
+	            Report::latest('date_start')->where('type_id',$report_type->id)->active()->take(3)->get(),
+            ];
 
             $i++;
             if($i==2) {
                 $i=0;
                 $k++;
             }
+
         }
         
         return view('user.home', compact('title', 'total_array'));
@@ -81,9 +70,9 @@ class HomeController extends Controller
         return view('user.cabinet', compact('user', 'role'));
     }
 
-    public function search ( Request $request, $quote = null ) {
+    public function search ( Request $request) {
 
-	    $size = 15;
+
 
 	    if($request->ajax()){
 
@@ -91,13 +80,18 @@ class HomeController extends Controller
 
 	    } else {
 
-		    $q      = strip_tags($quote);
+		    $q = strip_tags($request->q);
 
 	    }
 
-		$results = ArticleReports::search($q)->active()->paginate(40);
+		//$results = ArticleReports::search($q)->active()->paginate(40);
 
-//	    $results = ArticleReports::search($q, $size);
+	    $results = ArticleReports::search($q, $size = 10000);
+
+		$results = $this->paginate($results, 20);
+
+	    $results->appends($request->all())->setPath('/simply_search');
+
 	    if($request->ajax()){
 
 //		    foreach( $results as $article) {
@@ -107,7 +101,7 @@ class HomeController extends Controller
 //            }
 		    return   $results;
 	    }
-
+//dd($request);
         return view('user.simplysearch', compact('results'));
     }
 
@@ -334,68 +328,6 @@ class HomeController extends Controller
         return view('user.advan_search_result', compact('articles', 'report_type', 'start_period', 'end_period', 'countries', 'companies', 'personalities', 'vvt_types'));
     }
 
-    public function findinalltables ( $start_period, $end_period, &$articles ) {
-
-
-//	      foreach ( ArticleReports::where([
-//          ['date_start', '>=', $start_period],
-//          ['date_end', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'weekly' ][ $item->id ] = $item;
-//        };
-
-//foreach ( Weeklyarticle::without_tags()->where([
-//        foreach ( Weeklyarticle::where([
-//          ['start_period', '>=', $start_period],
-//          ['end_period', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'weekly' ][ $item->id ] = $item;
-//        };
-//
-//        foreach ( Monthlyarticle::where([
-//          ['start_period', '>=', $start_period],
-//          ['end_period', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'monthly' ][ $item->id ] = $item;
-//        }
-//
-//        foreach ( InfoCountry::where([
-//          ['start_date', '>=', $start_period],
-//          ['end_date', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'countrycatalog' ][ $item->id ] = $item;
-//        }
-//
-//        foreach ( Yearlyarticle::where([
-//          ['start_period', '>=', $start_period],
-//          ['end_period', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'yearly' ][ $item->id ] = $item;
-//        }
-//
-//        foreach ( Plannedexhibition::where([
-//          ['start', '>=', $start_period],
-//          ['fin', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'plannedexhibition' ][ $item->id ] = $item;
-//        }
-
-        /*foreach ( Exhibition::without_tags()->where([
-          ['startdate', '>=', $start_period],
-          ['enddate', '<=', $end_period],
-        ])->active()->get() as $item ) {
-            $articles[ 'exhibition' ][ $item->id ] = $item;
-        }*/
-//
-//        foreach ( Variousarticle::where([
-//          ['start_period', '>=', $start_period],
-//          ['end_period', '<=', $end_period],
-//        ])->active()->paginate(30) as $item ) {
-//            $articles[ 'various' ][ $item->id ] = $item;
-//        }
-
-        return $articles;
-    }
 
     public function findbytagsinalltables ( $countries, $companies, $vvt_types, $personalities, $start_period, $end_period, &$articles ) {
 
@@ -424,7 +356,7 @@ class HomeController extends Controller
 
         }
         foreach ( $personalities as $personality ) {
-	        $articles = $articles->concat($vvt_type->articles()->where( [
+	        $articles = $articles->concat($personality->articles()->where( [
 	            ['date_start', '>=', $start_period],
 	            ['date_end', '<=', $end_period],
             ])->active()->get() );
@@ -557,5 +489,14 @@ class HomeController extends Controller
 	        ->send(new SendEmail($objMail));
 
     	return redirect()->back()->with('status', 'Сообщение отправлено');
+    }
+
+    public function indexes() {
+
+    	ArticleReports::putMapping($ignoreConflicts = true);
+    	ArticleReports::addAllToIndex();
+
+	    return redirect()->to('/report');
+
     }
 }

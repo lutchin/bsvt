@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-//use Elasticquent\ElasticquentTrait;
+use Elasticquent\ElasticquentTrait;
 
 class ArticleReports extends Model
 {
@@ -16,8 +16,8 @@ class ArticleReports extends Model
 		'status',
 		'description',
 	];
-	use SearchableTrait;
-//	use ElasticquentTrait;
+	//use SearchableTrait;
+	use ElasticquentTrait;
 
 	/**
 	 * Searchable rules.
@@ -52,7 +52,7 @@ class ArticleReports extends Model
 		],
 		'description' => [
 			'type' => 'text',
-			'analyzer' => 'standard'
+			'analyzer' => 'russian'
 		]
 
 	];

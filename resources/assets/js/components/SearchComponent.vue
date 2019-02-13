@@ -46,7 +46,7 @@
             search_result() {
                 if (this.q.length >= 1) {
 
-                    window.location.href = "/simply_search/" + this.q;
+                    window.location.href = "/simply_search?q=" + this.q;
                 }
             }
 

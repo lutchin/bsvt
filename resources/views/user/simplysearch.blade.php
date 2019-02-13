@@ -44,7 +44,8 @@
                     <!-- <hr> -->
 
                     @endforeach
-        {{--<div class="pagination">{{$results->links()}}</div>--}}
+        <div class="pagination">{{ $results->links() }}
+        </div>
                     <div class="row box_save_article mt30">
                         <a href="{{ URL::previous() }}" class="button butt_back">Назад</a> <button class="button butt_def show_pdf_search">Показать в PDF</button>
                     </div>
