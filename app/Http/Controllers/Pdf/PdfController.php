@@ -60,6 +60,8 @@ class PdfController extends Controller {
 /**********************************************************************************************************************/
 	public function pdf_item ( $id ) {
 
+
+
 		$report = Report::find($id);
 		$report_slug = $report->types->slug;
 
@@ -72,103 +74,6 @@ class PdfController extends Controller {
 			$format = ['format' => 'A4'];
 
 		}
-
-//		switch ($reports){
-//
-//			case 'weekly':
-//				$article = $data_report = Weeklyreport::find($id);
-//				$template = 'user.weeklyreview.pdf_item';
-//				$find = 1;
-//				$categories  = Category::where('report_type_id', 1)->get();
-//				break;
-//
-//			case 'monthly':
-//				$article = $data_report = Monthlyreport::find($id);
-//				$template = 'user.monthlyreview.pdf_item';
-//				$find = 2;
-//				$start_date = $article->start_date;
-//				break;
-//
-//			case 'countrycatalog':
-//				$article = Countrycatalog::find($id);
-//				$template = 'user.countrycatalog.pdf_item';
-//				$find = 3;
-//				$number = $article->number;
-//				$start_date = $article->start_date;
-//				$end_date = $article->end_date;
-//				$data_report = $article->regions()->first();
-//				break;
-//
-//			case 'yearly':
-//				$article = $data_report = Yearlyreport::find($id);
-//				$template = 'user.yearlyreview.pdf_item';
-//				$number = $article->number;
-//				$find = 4;
-//				break;
-//
-//			case 'plannedexhibition':
-//				$article = $data_report =  Plannedexhibitionyear::find($id);
-//				$report = $article ->plannedexhibitions()->latest('id')->paginate(100)->items();
-//				$template = 'pdf.plan_list';
-//				$find = 5;
-//				$format = ['format' => 'A4-L'];
-//				break;
-//
-//			case 'various':
-//				$report = $data_report = Variousreport::find($id);
-//				$template = 'user.various.pdf_item';
-//				$find = 7;
-//				break;
-//
-//		}
-//
-//		$reporttitle = ReportType::find($find)->title;
-//
-//		if($reports == 'monthly') {
-//
-//			$articles = $article->articles()->with(['category', 'subcategory'])->get();
-//
-//			if ( $articles->count() !== 0 ) {
-//				foreach ( $articles as $article ) {
-//
-//					$category                           = $article->category != NULL ? $article->category->title : 'false';
-//					$subcategory                        = $article->subcategory != NULL ? $article->subcategory->title : 'false';
-//					$report[ $category ][ $subcategory ][] = $article;
-//
-//				}
-//			}
-//
-//		}
-//
-//		if ($reports == 'yearly') {
-//
-//			$report = $article->articlesReport->merge($article->categories()->with('subcategories', 'subcategories.articles','articles')->get());
-//		}
-//
-//		if ($reports == 'countrycatalog') {
-//
-//			$report = $article->regions()->with( 'countries')->get();
-//		}
-//
-//		if ($reports == 'weekly') {
-//
-//			$articles = $article->articles()->with('category')->get();
-//
-//			if ( $articles->count() !== 0 ) {
-//
-//				$report = $articles->mapToGroups(function( $item, $key )
-//				{
-//					if ( $item->category !== NULL ) {
-//
-//						return [$item->category->title => $item];
-//					}
-//					else {
-//						return [0 => NULL];
-//					}
-//				});
-//			}
-//
-//		}
 
 		if (  $report->types->slug == 'weekly' || $report->types->slug == 'monthly' ) {
 
@@ -278,18 +183,17 @@ class PdfController extends Controller {
 	public function pdf_search(RequestSearchPdf $request)
 	{
 
-//		dump($request->id);
 
-			$articles = ArticleReports::whereIn('id',$request->id)->get();
-			$format = ['format' => 'A4'];
-			foreach ($articles as $article) {
-					$items[false][false] [] = $article;
-			}
-			$report_slug = 'search';
-			$template = 'pdf.pdf_item';
+        $articles = ArticleReports::whereIn('id',$request->id)->get();
+        $format = ['format' => 'A4'];
+        foreach ($articles as $article) {
+                $items[false][false] [] = $article;
+        }
+        $report_slug = 'search';
+        $template = 'pdf.pdf_item';
 
-			$pdf = \PDF::loadView($template, compact('report', 'items','report_slug','descriptions'), [], $format);
-			return $pdf->stream( 'Результаты поиска' .'.pdf' );
+        $pdf = \PDF::loadView($template, compact('report', 'items','report_slug','descriptions'), [], $format);
+        return $pdf->stream( 'Результаты поиска' .'.pdf' );
 	}
 
 	public function setTitle( $report ){
