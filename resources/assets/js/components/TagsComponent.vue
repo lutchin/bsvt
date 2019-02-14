@@ -136,40 +136,15 @@
                 </div>
                 <a class="butt_save butt_add_tag" href="#">
                     <template v-if="name_tag=='company'">
-                        <button @click="storecompany()">Сохранить тег</button>
+                        <button @click="storetag('company')">Сохранить тег</button>
                     </template>
                     <template v-else>
-                        <button @click="storeperonality()">Сохранить тег</button>
+                        <button @click="storetag('personalities')">Сохранить тег</button>
                     </template>
 
                 </a>
             </div>
         </div>
-
-        <!--personalities -->
-        <!--<div class="popup_tag popup_tag_personalities" style="display: none;">-->
-        <!--<div class="bg_popup_tag"></div>-->
-        <!--<div class="popup_tag_form">-->
-        <!--<div class="close_tag">x</div>-->
-        <!--<h4 class="mb30">Добавить <span>поисковую метку</span></h4>-->
-        <!--<div class="popup_tag_form_box">-->
-        <!--<input name="tag" placeholder="Введите название персоналии" v-model="addperson"/>-->
-        <!--<div class="select_wrap">-->
-        <!--<select name="personalities_select_country" @change="pushcountrytopersona()"v-model="attachcountrytopersona" class="personalities_select_country">-->
-        <!--<option value="" disabled>&#45;&#45;Страна&#45;&#45;</option>-->
-        <!--<option v-for="country in countries" :value="country.id">{{country.title}}</option>-->
-        <!--</select>-->
-        <!--</div>-->
-        <!--<div class="mb10 d-flex flex-column justify-content-center">-->
-        <!--<span class="out_personalities_country_select pl20"></span>-->
-        <!--<br>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<a class="butt_save butt_add_tag" href="#">-->
-
-        <!--</a>-->
-        <!--</div>-->
-        <!--</div>-->
 
         <!-- deltag modal -->
         <div class="popup popup_deltag" style="display: none;">
@@ -338,16 +313,29 @@
 
             },
 
-            storecompany() {
+            storetag(tag) {
                 jQuery('.popup_tag_company .popup_tag_form_box .mess_er_tag').text('');
 
                 var is_tag = 0;
                 var title = this.addvalue;
-                this.companies.forEach(function (company) {
-                    if (company.title == title) {
-                        is_tag++;
-                    }
-                });
+
+                if(tag=='company') {
+                    this.companies.forEach(function (company) {
+                        if (company.title == title) {
+                            is_tag++;
+                        }
+                    });
+                }
+
+                else {
+                    this.personalities.forEach(function (personality) {
+                        if (personality.title == title) {
+                            is_tag++;
+                        }
+                    });
+                }
+
+
 
                 if(this.selectedtags != undefined) {
 
@@ -358,7 +346,8 @@
                         article : this.selectedtags.article,
                     } ;
 
-                } else {
+                }
+                else {
 
                     var data = {
                         title: this.addvalue,
@@ -366,15 +355,26 @@
                         vvt_tag: this.vvtarray,
                     } ;
                 }
+
                 console.log("Отправка на сервер:");
                 console.log(data);
 
                 if (is_tag == 0) {
-                    axios.post('/company', data).then(response => {
-                        this.selcompanies = response.data;
-                    this.checkboxfilter();
 
-                });
+                    if(tag=='company') {
+
+                        axios.post('/company', data).then(response => {
+                            this.selcompanies = response.data;
+                        this.checkboxfilter();
+                        });
+
+                    }
+                    else {
+                        axios.post('/personalities', data).then(response => {
+                            this.selpersonalities = response.data;
+                        this.checkboxfilter();
+                        });
+                    }
 
                     this.addvalue = '';
                     this.attachcountry = [];
@@ -402,65 +402,8 @@
                 }
             },
 
-            storeperonality(e) {
-                //e.preventDefault();
-                jQuery('.popup_tag_personalities .popup_tag_form_box .mess_er_tag').text('');
 
-                var is_tag = 0;
-                var title = this.addvalue;
-                this.personalities.forEach(function (personality) {
-                    if (personality.title == title) {
-                        is_tag++;
-                    }
-                });
 
-                if(this.selectedtags != undefined) {
-
-                    var data = {
-                        title: this.addvalue,
-                        countries: this.countryarray,
-                        vvt_tag: this.vvtarray,
-                        article : this.selectedtags.article,
-                    };
-
-                } else {
-
-                    var data = {
-                        title: this.addvalue,
-                        countries: this.countryarray,
-                        vvt_tag: this.vvtarray,
-                    } ;
-                }
-                console.log("Отправка на сервер:");
-                console.log(data);
-                if (is_tag == 0) {
-                    axios.post('/personalities', data).then(response => {
-                        this.selpersonalities = response.data;
-                    this.checkboxfilter();
-                });
-
-                    this.addvalue = '';
-                    this.attachcountry = [];
-                    this.attachvvt = [];
-                    this.countryarray = [];
-                    this.vvtarray = [];
-                    this.article = '';
-                    this.report = '';
-
-                    setTimeout(function () {
-                        jQuery('.select_country option').removeAttr('selected');
-                        jQuery('.select_country option:first-child').attr('selected', 'selected');
-                    }, 100);
-
-                    jQuery('.close_tag').click();
-                } else {
-                    if (jQuery('.popup_tag_personalities .popup_tag_form_box .mess_er_tag').length) {
-                        jQuery('.popup_tag_personalities .popup_tag_form_box .mess_er_tag').text('Тег уже существует');
-                    } else {
-                        jQuery('.popup_tag_personalities .popup_tag_form_box').append('<p class="mess_er_tag mb30">Тег уже существует</p>');
-                    }
-                }
-            },
 
             gettags() {
                 axios.get('/tags').then(response => {
