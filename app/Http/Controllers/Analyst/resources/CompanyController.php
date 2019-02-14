@@ -13,6 +13,7 @@ use App\models\analyst\weekly\Weeklyarticle;
 use App\models\analyst\yearly\InfoCountry;
 use App\models\analyst\yearly\Yearlyarticle;
 use App\models\analyst\exhibitions\Plannedexhibition;
+use App\ArticleReports;
 
 class CompanyController extends Controller
 {
@@ -44,27 +45,29 @@ class CompanyController extends Controller
      */
     public function store ( Request $request ) {
 
-	    switch ($request->input('report')) {
-		    case 'Yearlyarticle':
-			    $article = Yearlyarticle::find($request->input('article'));
-			    break;
-		    case 'Weeklyarticle':
-			    $article = Weeklyarticle::find($request->input('article'));
-			    break;
-		    case 'Variousarticle':
-			    $article = Variousarticle::find($request->input('article'));
-			    break;
-		    case 'Plannedexhibition':
-			    $article = Plannedexhibition::find($request->input('article'));
-			    break;
-		    case 'Monthlyarticle':
-			    $article = Monthlyarticle::find($request->input('article'));
-			    break;
-		    case 'InfoCountry':
-			    $article = InfoCountry::find($request->input('article'));
-			    break;
-	    }
+//	    switch ($request->input('report')) {
+//		    case 'Yearlyarticle':
+//			    $article = Yearlyarticle::find($request->input('article'));
+//			    break;
+//		    case 'Weeklyarticle':
+//			    $article = Weeklyarticle::find($request->input('article'));
+//			    break;
+//		    case 'Variousarticle':
+//			    $article = Variousarticle::find($request->input('article'));
+//			    break;
+//		    case 'Plannedexhibition':
+//			    $article = Plannedexhibition::find($request->input('article'));
+//			    break;
+//		    case 'Monthlyarticle':
+//			    $article = Monthlyarticle::find($request->input('article'));
+//			    break;
+//		    case 'InfoCountry':
+//			    $article = InfoCountry::find($request->input('article'));
+//			    break;
+//	    }
 
+		$article = ArticleReports::find($request->article);
+		
         if ( Company::where('title', $request->input('title'))->count() != 0 ) {
 
             $error = 'Такой тег уже существует';
@@ -129,9 +132,9 @@ class CompanyController extends Controller
     public function update ( Request $request, $id )
     {
 	    $tag = Company::find($id);
-	    $tag->title = $request->data['title'];
-		$tag->addCountries($request->data['countries']);
-		$tag->addVvt($request->data['vvt_tag']);
+	    $tag->title = $request->title;
+		$tag->addCountries($request->countries);
+		$tag->addVvt($request->vvt_tag);
 	    $tag->save();
     }
 
